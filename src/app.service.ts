@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Field, SelfProof, ZkProgram, verify } from 'o1js';
 import { setupAndDeploy } from './deploy';
+import { spawn } from 'child_process';
+import path from 'path';
+import { promises as fs } from 'fs';
 
 const Add = ZkProgram({
   name: 'add-example',
@@ -43,6 +46,23 @@ const Add = ZkProgram({
   },
 });
 
+interface DeployAlias {
+  networkId: string;
+  url: string;
+  keyPath: string;
+  feepayerKeyPath: string;
+  feepayerAlias: string;
+  fee: string;
+}
+
+interface Config {
+  version: number;
+  deployAliases: {
+    [key: string]: DeployAlias;
+  };
+}
+
+
 @Injectable()
 export class AppService {
   getHello(): string {
@@ -73,8 +93,43 @@ export class AppService {
       return { success: true, verificationResult: ok };
   }
 
-  async deploy(){
-    setupAndDeploy("name3");
+  async deploy(alias: string){
+    setupAndDeploy(alias);
+  }
+
+  async config(newAliasName: string): Promise<void> {
+    try {
+      // Read the existing config file
+      const configPath = path.resolve(process.cwd(), 'config.json');
+      const configContent = await fs.readFile(configPath, 'utf8');
+      const config: Config = JSON.parse(configContent);
+  
+      // Check if the alias already exists
+      if (config.deployAliases[newAliasName]) {
+        console.log(`Deploy alias "${newAliasName}" already exists. Skipping.`);
+        return;
+      }
+  
+      // Create the new deploy alias object
+      const newAlias: DeployAlias = {
+        networkId: "testnet",
+        url: "https://api.minascan.io/node/devnet/v1/graphql",
+        keyPath: `keys/${newAliasName}.json`,
+        feepayerKeyPath: "C:\\Users\\user/.cache/zkapp-cli/keys/a.json",
+        feepayerAlias: "a",
+        fee: "0.1"
+      };
+  
+      // Add the new alias to the config
+      config.deployAliases[newAliasName] = newAlias;
+  
+      // Write the updated config back to the file
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+  
+      console.log(`Successfully added new deploy alias "${newAliasName}" to config.json`);
+    } catch (error) {
+      console.error('Error adding new deploy alias:', error);
+    }
   }
 
 }

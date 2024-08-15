@@ -13,6 +13,8 @@ export class Add3 extends SmartContract {
   @state(Field) name = State<Field>();
   @state(Field) name2 = State<Field>();
   @state(Field) name3 = State<Field>();
+  @state(Field) name4 = State<Field>();
+  @state(Field) name5 = State<Field>();
 
   init() {
     super.init();

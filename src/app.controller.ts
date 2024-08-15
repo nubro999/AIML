@@ -21,7 +21,15 @@ export class AppController {
   @Get("/deploy")
   deploy(): string {
 
-    this.appService.deploy()
+    this.appService.deploy("a")
+
+    return "done"
+  }
+
+  @Get("/config")
+  config(): string {
+
+    this.appService.config("a")
 
     return "done"
   }

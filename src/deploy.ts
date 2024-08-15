@@ -34,14 +34,15 @@ async function loadKeys(deployAlias: string) {
     const feepayerKeysPath = path.resolve(process.cwd(), config.feepayerKeyPath);
     const feepayerKeysBase58 = JSON.parse(await fs.readFile(feepayerKeysPath, 'utf8'));
 
-    const zkAppKeysPath = path.resolve(process.cwd(), 'keys', 'name.json');
+    const zkAppKeysPath = path.resolve(process.cwd(), 'keys', `${deployAlias}.json`);
+    console.log(`${deployAlias}.json`)
     const zkAppKeysBase58 = JSON.parse(await fs.readFile(zkAppKeysPath, 'utf8'));
 
-
+    console.log(feepayerKeysBase58.privateKey)
     const feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
+    console.log(zkAppKeysBase58.privateKey)
     const zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey)
 
-    console.log('Feepayer key:', feepayerKey.toPublicKey().toBase58());
 
     return { feepayerKey, zkAppKey, config };
   } catch (error) {
@@ -70,9 +71,8 @@ function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
 
 export async function setupAndDeploy(deployAlias: string) {
   try {
-    const { feepayerKey, config } = await loadKeys(deployAlias);
-
-    let zkAppKey = PrivateKey.fromBase58("EKEAUZqX8RU38ULKp5xUwJziAURjktW3jtsa8iE29Cfv1Xjhuuu5")
+    const { feepayerKey, zkAppKey, config } = await loadKeys(deployAlias);
+    
     const Network = Mina.Network({
       networkId: (config.networkId ?? DEFAULT_NETWORK_ID) as NetworkId,
       mina: config.url ?? "https://api.minascan.io/node/devnet/v1/graphql",
@@ -80,7 +80,7 @@ export async function setupAndDeploy(deployAlias: string) {
     });
 
     console.log("Network URL:", config.url ?? "https://api.minascan.io/node/devnet/v1/graphql");
-
+    console.log("FeePayer key"+ feepayerKey)
     const fee = Number(config.fee ?? '0.1') * 1e9; // in nanomina
     Mina.setActiveInstance(Network);
 
