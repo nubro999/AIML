@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { config } from 'rxjs';
 
 @Controller()
 export class AppController {
@@ -19,18 +20,14 @@ export class AppController {
   }
 
   @Get("/deploy")
-  deploy(): string {
-
-    this.appService.deploy("a")
-
-    return "done"
-  }
-
-  @Get("/config")
-  config(): string {
-
-    this.appService.config("a")
+  async deploy(): Promise<string> {
+    await this.appService.config("b")
+    console.log("config")
+    await this.appService.deploy("b")
+    console.log("deploy")
 
     return "done"
   }
+
+
 }

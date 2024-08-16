@@ -116,7 +116,7 @@ export class AppService {
         url: "https://api.minascan.io/node/devnet/v1/graphql",
         keyPath: `keys/${newAliasName}.json`,
         feepayerKeyPath: "C:\\Users\\user/.cache/zkapp-cli/keys/a.json",
-        feepayerAlias: "a",
+        feepayerAlias: "account1",
         fee: "0.1"
       };
   
