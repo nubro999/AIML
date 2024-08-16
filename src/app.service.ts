@@ -5,6 +5,11 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { promises as fs } from 'fs';
 
+
+
+
+import { fileURLToPath } from 'url';
+
 const Add = ZkProgram({
   name: 'add-example',
   publicInput: Field,
@@ -97,41 +102,82 @@ export class AppService {
     setupAndDeploy(alias);
   }
 
-  async config(newAliasName: string): Promise<void> {
-    try {
-      // Read the existing config file
-      const configPath = path.resolve(process.cwd(), 'config.json');
-      const configContent = await fs.readFile(configPath, 'utf8');
-      const config: Config = JSON.parse(configContent);
-  
-      // Check if the alias already exists
-      if (config.deployAliases[newAliasName]) {
-        console.log(`Deploy alias "${newAliasName}" already exists. Skipping.`);
-        return;
-      }
-  
-      // Create the new deploy alias object
-      const newAlias: DeployAlias = {
-        networkId: "testnet",
-        url: "https://api.minascan.io/node/devnet/v1/graphql",
-        keyPath: `keys/${newAliasName}.json`,
-        feepayerKeyPath: "C:\\Users\\user/.cache/zkapp-cli/keys/a.json",
-        feepayerAlias: "account1",
-        fee: "0.1"
-      };
-  
-      // Add the new alias to the config
-      config.deployAliases[newAliasName] = newAlias;
-  
-      // Write the updated config back to the file
-      await fs.writeFile(configPath, JSON.stringify(config, null, 2));
-  
-      console.log(`Successfully added new deploy alias "${newAliasName}" to config.json`);
-    } catch (error) {
-      console.error('Error adding new deploy alias:', error);
-    }
+
+  async config(deployAlias: string) {
+    return new Promise<void>((resolve, reject) => {
+      const isWindows = process.platform === 'win32';
+      const command = isWindows ? 'zk.cmd' : 'zk';
+
+      const zkProcess = spawn(command, ['config'], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        shell: true
+      });
+
+      zkProcess.stdout.on('data', (data) => {
+        const output = data.toString();
+        console.log('ZK output:', output);
+
+        if (output.includes('Enter values to create a deploy alias:')) {
+          zkProcess.stdin.write(`${deployAlias}\n`);
+        } else if (output.includes('Choose the target network:')) {
+          zkProcess.stdin.write('https://api.minascan.io/node/devnet/v1/graphql\n');
+        } else if (output.includes('Set the GraphQL API URL')) {
+          zkProcess.stdin.write('https://api.minascan.io/node/devnet/v1/graphql\n');
+        } else if (output.includes('Set transaction fee to use when deploying (in MINA):')) {
+          zkProcess.stdin.write('0.1\n');
+        } else if (output.includes('Choose an account to pay transaction fees:')) {
+          console.log("Selecting default fee payer account");
+          // Move up one line and select the first option
+          zkProcess.stdin.write('\u001B[A\n');
+        } else if (output.includes('Choose another saved fee payer:')) {
+          console.log("Choose another saved fee payer:");
+          // Move up one line and select the first option
+          zkProcess.stdin.write('\u001B[B\n');
+        } 
+      });
+
+      zkProcess.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+      });
+
+      zkProcess.on('close', (code) => {
+        if (code === 0) {
+          console.log('ZK config completed successfully');
+          resolve();
+        } else {
+          console.error(`ZK config process exited with code ${code}`);
+          reject(new Error(`Process exited with code ${code}`));
+        }
+      });
+    });
   }
 
+  async updateNetworkId(deployAlias: string) {
+  try {
+    // Read the config file
+    const configPath = path.resolve(process.cwd(), 'config.json');
+    const configData = await fs.readFile(configPath, 'utf8');
+    const config = JSON.parse(configData);
+
+    // Check if the deployAlias exists
+    if (!config.deployAliases[deployAlias]) {
+      console.log(`Deploy alias "${deployAlias}" not found in config.json`);
+      return;
+    }
+
+    // Update the networkId if it's mainnet
+    if (config.deployAliases[deployAlias].networkId === "mainnet") {
+      config.deployAliases[deployAlias].networkId = "testnet";
+      console.log(`Updated networkId for "${deployAlias}" from mainnet to testnet`);
+    } else {
+      console.log(`NetworkId for "${deployAlias}" is already set to ${config.deployAliases[deployAlias].networkId}`);
+    }
+
+    // Write the updated config back to the file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+    console.log(`Successfully updated config.json`);
+  } catch (error) {
+    console.error('Error updating config.json:', error);
+  }
+  }
 }
-
-
