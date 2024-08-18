@@ -152,6 +152,7 @@ export class AppService {
     });
   }
 
+  
   async updateNetworkId(deployAlias: string) {
   try {
     // Read the config file

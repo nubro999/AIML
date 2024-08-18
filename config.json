@@ -81,6 +81,14 @@
       "feepayerKeyPath": "C:\\Users\\user/.cache/zkapp-cli/keys/account1.json",
       "feepayerAlias": "account1",
       "fee": "0.1"
+    },
+    "umi": {
+      "networkId": "testnet",
+      "url": "https://api.minascan.io/node/devnet/v1/graphql",
+      "keyPath": "keys/umi.json",
+      "feepayerKeyPath": "C:\\Users\\user/.cache/zkapp-cli/keys/account1.json",
+      "feepayerAlias": "account1",
+      "fee": "0.1"
     }
   }
 }
