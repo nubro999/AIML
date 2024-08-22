@@ -14,6 +14,7 @@ const Add = ZkProgram({
   name: 'add-example',
   publicInput: Field,
 
+  
   methods: {
     init: {
       privateInputs: [],
