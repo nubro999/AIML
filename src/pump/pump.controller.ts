@@ -1,27 +1,27 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { config } from 'rxjs';
+import { Controller, Post, Body } from '@nestjs/common';
 import { PumpService } from './pump.service';
 
 @Controller("/pump")
 export class PumpController {
-  constructor(private readonly pumpService:PumpService ) {}
+  constructor(private readonly pumpService: PumpService) {}
 
-  @Get("/deploy")
-  async deployToken(){
-    console.log("pump.deploy")
+  @Post("/deploy")
+  async deployToken(@Body() body: { tokenName: string, tokenSymbol: string }) {
+    console.log("pump.deploy");
 
-    const tokenCreated = await this.pumpService.createNewToken("umi", "UMI")
+    const { tokenName, tokenSymbol } = body;
+
+    const tokenCreated = await this.pumpService.createNewToken(tokenName, tokenSymbol);
     
     const tokenAddress = tokenCreated.tokenAddress;
-    const tokenName = tokenCreated.tokenName
-    const tokenSymbol = tokenCreated.tokenSymbol
-    
 
-    this.pumpService.createNewAMM(tokenAddress, tokenName,tokenSymbol,"600");
+    await this.pumpService.createNewAMM(tokenAddress, tokenName, tokenSymbol, "600");
 
-    return 
+    return {
+      tokenAddress: tokenAddress,
+      tokenName: tokenName,
+      tokenSymbol: tokenSymbol,
+      mintedAmount: tokenCreated.mintedAmount // Assuming this is returned from createNewToken
+    };
   }
-
-
-
 }
