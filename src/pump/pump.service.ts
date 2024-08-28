@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { Pump } from './pump.entity';
+import { PumpRepository } from './pump.repository';
 
 @Injectable()
 export class PumpService {
@@ -9,7 +11,10 @@ export class PumpService {
   private tokenFactory: ethers.Contract;
 
 
-  constructor() {
+  constructor(
+
+    private readonly pumpRepository: PumpRepository,
+  ) {
     // Initialize provider, signer, and contract
     this.provider = ethers.getDefaultProvider('https://arbitrum-sepolia.infura.io/v3/035c5c117cd649d7bdbb5ee61b3cb696'); 
     // Note: In a production environment, you should use a secure way to manage private keys
@@ -1092,16 +1097,33 @@ export class PumpService {
   
       // Convert BigInt values to strings
 
-      return 
+      return newAMMAddress
     } catch (error) {
       console.error('Error creating AMM', error);
       throw error;
     }
   }
-
-  async supplyLiquidity(){
+   async supplyLiquidity(){
 
   }
   
-  
+  async addPump(tokenAddress: string, ammAddress: string, creator:string, name: string, symbol: string): Promise<Pump> {
+    console.log("adding pump...")
+    const newPump = this.pumpRepository.create({
+      tokenAddress,
+      ammAddress,
+      creator,
+      name,
+      symbol,
+    });
+
+    return this.pumpRepository.save(newPump);
+  }
+
+  async getTokensByCreator(creator: string): Promise<Pump[]> {
+    return this.pumpRepository.find({
+      where: { creator: creator }
+    });
+  }
+
 }
