@@ -14,11 +14,11 @@ import { PricefeedModule } from './pricefeed/pricefeed.module';
 @Module({
   imports: [TypeOrmModule.forRoot({
     type: 'mysql',
-    host: 'localhost',
+    host: 'ezcryptoexchange.creye0kuc4ct.ap-northeast-2.rds.amazonaws.com',
     port: 3306,
     username: 'root',
-    password: 'root',
-    database: 'pumpz',
+    password: 'rootroot',
+    database: 'ezcryptoexchange',
     entities: [Pump],
     synchronize: true,
   }), MinaModule, PumpModule, UserModule, PricefeedModule],
