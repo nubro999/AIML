@@ -626,7 +626,9 @@ export class PumpService {
   async createNewToken(tokenName: string, tokenSymbol: string, imageURL: string ){
     try {
       console.log("Creating new token...");
-  
+      console.log(tokenName)
+      console.log(tokenSymbol)
+      console.log(imageURL)
       // Create a new token
       const tx = await this.tokenFactory.createToken(tokenName, tokenSymbol, imageURL);
       console.log("Token creation transaction sent:", tx.hash);
