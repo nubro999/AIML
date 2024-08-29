@@ -8,12 +8,12 @@ export class PumpController {
   ) {}
 
   @Post("/deploy")
-  async deployToken(@Body() body: { tokenName: string, tokenSymbol: string }) {
+  async deployToken(@Body() body: { tokenName: string, tokenSymbol: string , imageURL:string }) {
     console.log("pump.deploy");
 
-    const { tokenName, tokenSymbol } = body;
+    const { tokenName, tokenSymbol, imageURL } = body;
 
-    const tokenCreated = await this.pumpService.createNewToken(tokenName, tokenSymbol);
+    const tokenCreated = await this.pumpService.createNewToken(tokenName, tokenSymbol, imageURL);
     
     const tokenAddress = tokenCreated.tokenAddress;
 
