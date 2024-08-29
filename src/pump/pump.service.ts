@@ -644,8 +644,8 @@ export class PumpService {
         throw new Error("TokenCreated event not found in transaction logs");
       }
   
-      const [newTokenAddress, , ] = ethers.AbiCoder.defaultAbiCoder().decode(
-        ['address', 'string', 'string'], 
+      const [newTokenAddress, eventImageURL, eventName, eventSymbol] = ethers.AbiCoder.defaultAbiCoder().decode(
+        ['address', 'string', 'string', 'string'], 
         event.data
       );
   
