@@ -1162,7 +1162,7 @@ export class PumpService {
       tokenAddress,
       ammAddress,
       creator,
-      name,
+      name, 
       symbol,
     });
 

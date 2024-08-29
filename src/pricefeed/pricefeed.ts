@@ -314,13 +314,14 @@ export class PriceFeed implements OnModuleInit {
   }
 
   private async fetchPriceForToken(tokenAddress: string): Promise<string> {
-    try {
-      const amountIn = ethers.parseEther('1'); // 1 token
-      const price = await this.cpammContract.getPrice(tokenAddress, amountIn);
-      return ethers.formatEther(price);
-    } catch (error) {
-      console.error('Error fetching price:', error);
-      throw error;
-    }
+    // try {
+    //   const amountIn = ethers.parseEther('10'); // 1 token
+    //   const price = await this.cpammContract.getPrice(tokenAddress, amountIn);
+    //   return ethers.formatEther(price);
+    // } catch (error) {
+    //   console.error('Error fetching price:', error);
+    //   throw error;
+    // }
+    return "not available now"
   }
 }
