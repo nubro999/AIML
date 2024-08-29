@@ -637,7 +637,7 @@ export class PumpService {
   
       // Get the new token address from the event logs
       const event = receipt.logs.find((log: ethers.Log) => 
-        log.topics[0] === ethers.id("TokenCreated(address,string,string)")
+        log.topics[0] === ethers.id("TokenCreated(address,string,string,string)")
       );
   
       if (!event) {
