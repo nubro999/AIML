@@ -23,7 +23,7 @@ if (!deployAlias)
 
 Usage:
 node build/src/interact.js <deployAlias>
-`);
+`)
 Error.stackTraceLimit = 1000;
 const DEFAULT_NETWORK_ID = 'testnet';
 

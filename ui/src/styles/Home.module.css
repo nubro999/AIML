@@ -1,10 +1,21 @@
-.main {
+.container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  padding: 5rem;
-  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--secondary-color);
 }
 
 .background {
@@ -67,64 +78,46 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(25%, auto));
-  width: var(--max-width);
-  max-width: 100%;
-  margin-bottom: 3rem;
-  justify-items: center;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .card {
-  padding: 0.8rem 1rem;
-  gap: 0.5rem;
   margin: 1rem;
-  background: rgba(var(--card-rgb), 0);
-  background-color: rgb(255, 255, 255);
-  border: 1px solid #2d2d2d;
-  border-radius: 4px 1px;
-  transform-style: preserve-3d;
-  transition: background 200ms, border 200ms;
-  width: 14rem;
+  padding: 1.5rem;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--primary-color);
+  border-radius: 10px;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.3s ease;
+  width: calc(50% - 2rem);
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.card:after {
-  content: '';
-  position: absolute;
-  inset: 0.4rem -0.4rem -0.4rem 0.4rem;
-  border-radius: 4px 1px;
-  border: 1px solid #2d2d2d;
-  transform: translateZ(-1px);
-  transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
+.card:hover,
+.card:focus,
+.card:active {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  transform: translateY(-5px);
 }
 
-.card span {
-  display: inline-block;
-  transition: transform 200ms;
-  font-size: 0.875rem;
-  font-weight: 700;
-}
-
-.card h2 {
-  display: flex;
-  font-weight: 600;
-  margin-bottom: 0.7rem;
-  justify-content: space-between;
-  letter-spacing: 0.13rem;
-}
-
-.card h2 div {
-  display: flex;
+.card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: var(--primary-color);
 }
 
 .card p {
   margin: 0;
-  opacity: 0.6;
-  font-size: 0.875rem;
-  padding-right: 0.72rem;
-  line-height: 1.3;
-  max-width: 30ch;
-  font-weight: 300;
+  font-size: 1.25rem;
+  line-height: 1.5;
 }
 
 .center {
@@ -206,4 +199,136 @@
   .grid {
     grid-template-columns: repeat(2, 50%);
   }
+}
+
+.header {
+  background-color: rgba(255, 105, 180, 0.9); /* Semi-transparent Hot Pink */
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.header nav a {
+  color: white;
+  margin-left: 1.5rem;
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.header nav a:hover {
+  color: var(--background-color);
+}
+
+.footer {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.description {
+  text-align: center;
+  line-height: 1.5;
+  font-size: 1.5rem;
+  margin-bottom: 3rem;
+  color: var(--accent-color);
+}
+
+.hero {
+  background-image: url('/images/auction-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 2rem;
+}
+
+.hero h2 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero p {
+  font-size: 1.5rem;
+  max-width: 600px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.button {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0051bb;
+}
+
+.auctionScrollContainer {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 20px;
+}
+
+.auctionGrid {
+  display: flex;
+  gap: 20px;
+  padding: 10px 0;
+  min-width: min-content;
+}
+
+.auctionBox {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  min-width: 250px;
+  max-width: 300px;
+  cursor: pointer; /* Add this line to show it's clickable */
+}
+
+.auctionBox:hover {
+  transform: translateY(-5px);
+}
+
+.auctionBox h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.auctionBox p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.chartContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
