@@ -1,0 +1,49 @@
+.auctionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.auctionScrollContainer {
+  width: 100%;
+  overflow-x: auto;
+  padding: 20px 0;
+}
+
+.auctionRow {
+  display: flex;
+  gap: 20px;
+  padding: 10px;
+}
+
+.auctionItem {
+  flex: 0 0 auto;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: left;
+}
+
+.auctionItem:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.auctionItem h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.auctionItem p {
+  margin: 5px 0;
+  color: #666;
+}

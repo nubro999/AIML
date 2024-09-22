@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
+import auctionStyles from '../styles/Auctions.module.css';
+import { useRouter } from 'next/router';
 
 interface Auction {
   id: number;
@@ -12,6 +14,7 @@ interface Auction {
 
 export default function Auctions() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     // Dummy data for active auctions
@@ -22,6 +25,10 @@ export default function Auctions() {
     ];
     setAuctions(dummyAuctions);
   }, []);
+
+  const handleAuctionClick = (auctionId: number) => {
+    router.push(`/bid/${auctionId}`);
+  };
 
   return (
     <div className={styles.container}>
@@ -48,14 +55,18 @@ export default function Auctions() {
       <main className={styles.main}>
         <h2 className={styles.title}>Current Auctions</h2>
         {auctions.length > 0 ? (
-          <div className={styles.auctionScrollContainer}>
-            <div className={styles.auctionGrid}>
+          <div className={auctionStyles.auctionScrollContainer}>
+            <div className={auctionStyles.auctionRow}>
               {auctions.map((auction) => (
-                <div key={auction.id} className={styles.auctionBox}>
+                <button
+                  key={auction.id}
+                  className={auctionStyles.auctionItem}
+                  onClick={() => handleAuctionClick(auction.id)}
+                >
                   <h3>{auction.title}</h3>
                   <p>Current Bid: ${auction.currentBid}</p>
                   <p>End Time: {auction.endTime}</p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
