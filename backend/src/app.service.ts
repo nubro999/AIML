@@ -5,9 +5,6 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { promises as fs } from 'fs';
 
-
-
-
 import { fileURLToPath } from 'url';
 
 const Add = ZkProgram({
@@ -134,7 +131,13 @@ export class AppService {
           console.log("Choose another saved fee payer:");
           // Move up one line and select the first option
           zkProcess.stdin.write('\u001B[B\n');
+        } else if (output.includes('Create an alias for this account:')) {
+          console.log("hi")
+          console.log("Create an alias for this account");
+          // Move up one line and select the first option
+          zkProcess.stdin.write(deployAlias);
         } 
+        
       });
 
       zkProcess.stderr.on('data', (data) => {

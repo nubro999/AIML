@@ -22,11 +22,11 @@ export class AppController {
 
   @Get("/deploy")
   async deploy(): Promise<string> {
-    await this.appService.config("umi")
-    console.log("--------------------------------------------------config")
+    // await this.appService.config("umi")
+    // console.log("--------------------------------------------------config")
     await this.appService.updateNetworkId("umi")
     console.log("--------------------------------------------------change")
-    await this.appService.deploy("umi")
+    await this.appService.deploy("item")
     console.log("--------------------------------------------------deploy")
 
     return "done"

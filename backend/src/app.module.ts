@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MinaModule } from './mina/mina.module';
+import { ItemsModule } from './items/items.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ItemsController } from './items/items.controller';
+import { ItemService } from './items/items.service';
 
 
 @Module({
@@ -16,8 +18,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     database: 'silentauction',
     entities: [],
     synchronize: true,
-  }), MinaModule, ],
-  controllers: [],
-  providers: [],
+  }), ItemsModule, ],
+  controllers: [AppController, ItemsController],
+  providers: [AppService, ItemService],
 })
 export class AppModule {}

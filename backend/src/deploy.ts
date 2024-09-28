@@ -8,6 +8,7 @@ import {
   NetworkId
 } from 'o1js';
 import { Add3 } from './contracts/add';
+import { Item } from './contracts/item';
 const DEFAULT_NETWORK_ID = 'testnet';
 
 type Config = {
@@ -20,6 +21,8 @@ type Config = {
     };
   };
 };
+
+
 
 async function loadKeys(deployAlias: string) {
   try {
