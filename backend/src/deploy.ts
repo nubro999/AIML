@@ -7,7 +7,7 @@ import {
   AccountUpdate,
   NetworkId
 } from 'o1js';
-import { Add3 } from './contracts/add';
+import { Add } from './contracts/add';
 import { Item } from './contracts/item';
 const DEFAULT_NETWORK_ID = 'testnet';
 
@@ -89,14 +89,14 @@ export async function setupAndDeploy(deployAlias: string) {
 
     const feepayerAddress = feepayerKey.toPublicKey();
     const zkAppAddress = zkAppKey.toPublicKey();
-    const zkApp = new Add3(zkAppAddress);
+    const zkApp = new Add(zkAppAddress);
 
     console.log('Fee:', fee);
     console.log('Feepayer address:', feepayerAddress.toBase58());
     console.log('zkApp address:', zkAppAddress.toBase58());
 
     console.log("Compiling contract...");
-    const a = await Add3.compile();
+    const a = await Add.compile();
     console.log("compile" + JSON.stringify(a))
     console.log("Deploying token A...");
     try {

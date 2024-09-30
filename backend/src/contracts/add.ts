@@ -9,7 +9,7 @@ import { Field, SmartContract, state, State, method, CircuitString, UInt64 } fro
  *
  * This file is safe to delete and replace with your own contract.
  */
-export class Add3 extends SmartContract {
+export class Add extends SmartContract {
   @state(Field) name = State<Field>();
   @state(Field) name5 = State<Field>();
 

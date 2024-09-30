@@ -7,7 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemsController } from './items/items.controller';
 import { ItemService } from './items/items.service';
 
-
+// B62qo23u5UYxJTw4Tni1pLLEHzTQEhh5fNSghHtkQowzNmQHrkJPSBk
 @Module({
   imports: [TypeOrmModule.forRoot({
     type: 'mysql',

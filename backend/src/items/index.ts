@@ -1,4 +1,4 @@
 
-import { Add3 } from '../contracts/add.js';
+import { Add } from '../contracts/add.js';
 import {Item} from '../contracts/item.js';
-export { Add3, Item };
+export { Add, Item };

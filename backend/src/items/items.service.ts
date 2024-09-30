@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
 import { AccountUpdate, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Item } from './index.js'; // Adjust this import path as needed
+import { MerkleMapProgram } from "../contracts/item.js";
 
 @Injectable()
 export class ItemService {
@@ -41,13 +42,12 @@ export class ItemService {
     this.zkAppAddress = this.zkAppKey.toPublicKey();
     this.zkApp = new Item(this.zkAppAddress);
 
+    await MerkleMapProgram.compile();
     await Item.compile();
   }
 
   async Deploy() {
     try {
-
-
       console.log("Deploying Item contract");
       let tx = await Mina.transaction(
         { sender: this.feepayerAddress, fee: this.fee },
@@ -73,6 +73,8 @@ export class ItemService {
       }
     }
   }
+
+  
   
 
   // Add other methods to interact with the Item contract as needed
