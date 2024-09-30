@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
 import { AccountUpdate, Mina, PrivateKey, PublicKey } from 'o1js';
-import { Item } from './index.js'; // Adjust this import path as needed
-import { MerkleMapProgram } from "../contracts/item.js";
+import { Item, MerkleMapProgram } from "../contracts/item.js";
 
 @Injectable()
 export class ItemService {
