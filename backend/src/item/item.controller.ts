@@ -1,5 +1,5 @@
 import { Controller, Get, Post, HttpException, HttpStatus } from '@nestjs/common';
-import { ItemService } from './items.service';
+import { ItemService } from './item.service';
 
 @Controller('items')
 export class ItemsController {
@@ -13,7 +13,7 @@ export class ItemsController {
   @Get('/deploy')
   async deployContract(): Promise<{ message: string; transactionHash?: string }> {
     try {
-      const result = await this.itemService.Deploy();
+      const result = await this.itemService.DeployMinaContract();
       if (result.success) {
         return { 
           message: 'Item contract deployed successfully', 

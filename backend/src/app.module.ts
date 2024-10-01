@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ItemsModule } from './items/items.module';
+import { ItemsModule } from './item/item.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ItemsController } from './items/items.controller';
-import { ItemService } from './items/items.service';
+import { ItemsController } from './item/item.controller';
+import { ItemService } from './item/item.service';
+import { AuctionLogsModule } from './auction-log/auction-log.module';
+import { AuctionLog } from './auction-log/auction-log.entity';
+import { Item } from './item/item.entity';
 
 // B62qo23u5UYxJTw4Tni1pLLEHzTQEhh5fNSghHtkQowzNmQHrkJPSBk
 @Module({
@@ -16,9 +19,9 @@ import { ItemService } from './items/items.service';
     username: 'root',
     password: 'root',
     database: 'silentauction',
-    entities: [],
+    entities: [Item, AuctionLog],
     synchronize: true,
-  }), ItemsModule, ],
+  }), ItemsModule, AuctionLogsModule, ],
   controllers: [AppController, ItemsController],
   providers: [AppService, ItemService],
 })

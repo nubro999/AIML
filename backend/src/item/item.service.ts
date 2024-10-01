@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
 import { AccountUpdate, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Item, MerkleMapProgram } from "../contracts/item.js";
+import { ItemRepository } from "./item.repository.js";
 
 @Injectable()
 export class ItemService {
@@ -14,8 +15,10 @@ export class ItemService {
   private zkAppAddress: PublicKey;
   private zkApp: Item;
 
-  constructor() {
-    this.initializeConfig();
+  constructor(private readonly itemRepository: ItemRepository) {}
+
+  async onModuleInit() {
+    await this.initializeConfig();
   }
 
   private async initializeConfig() {
@@ -45,7 +48,7 @@ export class ItemService {
     await Item.compile();
   }
 
-  async Deploy() {
+  async DeployMinaContract() {
     try {
       console.log("Deploying Item contract");
       let tx = await Mina.transaction(
@@ -71,6 +74,27 @@ export class ItemService {
         return { success: false, error: "An unknown error occurred" };
       }
     }
+  }
+
+  async AddItem(name: string, description: string, minimumPrice: number, endTime: Date, merkleMapRoot: string){
+
+    console.log("adding item..")
+
+    const newItem = this.itemRepository.save({
+      name: name,
+      description: description,
+      minimumPrice: minimumPrice,
+      endTime: endTime,
+      merkleMapRoot: merkleMapRoot || '', // Assuming this is set later or has a default
+
+    })
+    
+
+
+  }
+
+  async UpdateMerkleMapRoot(){
+
   }
 
   

@@ -35,6 +35,7 @@ import {
     ];
   
     let map = new MerkleMap();
+    console.log(map)
   
     const rollupStepInfo: any[] = [];
   
