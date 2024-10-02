@@ -43,7 +43,12 @@ export default class ZkappWorkerClient {
     return Field.fromJSON(JSON.parse(result as string));
   }
 
-  createUpdateTransaction() {
+  async setMerkleMapRoot(): Promise<Field> {
+    const result = await this._call('setRoot', {});
+    return Field.fromJSON(JSON.parse(result as string));
+  }
+
+  createUpdateRootTransaction() {
     return this._call('createUpdateRootTransaction', {});
   }
 

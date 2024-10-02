@@ -5,8 +5,6 @@ import styles from '../styles/Home.module.css';
 import ZkappWorkerClient from './zkappWorkerClient';
 import { PublicKey, Field } from 'o1js';
 
-let transactionFee = 0.1;
-const ZKAPP_ADDRESS = 'B62qo5pT5pooYvwcmZ44BSMwpBNNpDtyqqe9GLXceTvY4T5f9Dj2xRr';
 
 export default function Home() {
   const [state, setState] = useState({

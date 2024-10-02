@@ -11,7 +11,7 @@ export class Item {
   name: string;
 
   @Column()
-  merkleMap: MerkleMap;
+  merkleMap: String;
 
   @Column()
   merkleMapRoot: string;

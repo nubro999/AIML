@@ -8,7 +8,7 @@ import ZkappWorkerClient from '../zkappWorkerClient';
 import { Field, PublicKey } from 'o1js';
 
 
-const ZKAPP_ADDRESS = 'B62qo5pT5pooYvwcmZ44BSMwpBNNpDtyqqe9GLXceTvY4T5f9Dj2xRr';
+const ZKAPP_ADDRESS = 'B62qmxEjRMdcmN3JNGPF2oZ3NsQZB1Cm583uoXfAmNSiMqsxckcf7mn';
 
 interface Auction {
   id: number;
@@ -34,6 +34,7 @@ export default function Bid() {
     zkappPublicKey: null as null | PublicKey,
     creatingTransaction: false,
   });
+  const zkappWorkerClient = new ZkappWorkerClient();
 
   useEffect(() => {
     if (id) {
@@ -59,12 +60,28 @@ export default function Bid() {
     console.log(`Placing bid of $${bidAmount} on auction ${id}`);
     
     try {
-      await state.zkappWorkerClient!.fetchAccount({ publicKey: state.publicKey! });
-      await state.zkappWorkerClient!.createUpdateTransaction();
+      console.log("GetCurrent MerkleRoot")
+
+      const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
+      console.log("currentMerkleMapRoot" + currentMerkleMapRoot)
+
+
+      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction();
+
+      const { hash } = await (window as any).mina.sendTransaction({
+        transaction: transactionJSON1,
+        feePayer: {
+          fee: 0.1,
+          memo: '',
+        },
+      });
+  
+      const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
+      console.log(`View transaction at ${transactionLink}`);
       setDisplayText('Proving transaction...');
-      await state.zkappWorkerClient!.proveUpdateTransaction();
+      await zkappWorkerClient.proveUpdateTransaction();
       setDisplayText('Getting transaction JSON...');
-      const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON() as string;
+      const transactionJSON = await zkappWorkerClient.getTransactionJSON() as string;
       setTransactionJSON(transactionJSON);
       setDisplayText('Transaction created! Send this transaction JSON to the backend.');
       setState({ ...state, creatingTransaction: false });
@@ -72,15 +89,17 @@ export default function Bid() {
       console.error(error);
       setDisplayText('Error creating transaction');
       setState({ ...state, creatingTransaction: false });
+
+      
     }
+
   }, [state, bidAmount, id]);
 
   
   const setupZkApp = async () => {
-    const zkappWorkerClient = new ZkappWorkerClient();
+
     await zkappWorkerClient.setActiveInstanceToDevnet();
-    await zkappWorkerClient.loadContract();
-    await zkappWorkerClient.compileContract();
+
     const mina = (window as any).mina;
     if (mina == null) {
       setState({ ...state, hasWallet: false });
@@ -90,6 +109,9 @@ export default function Bid() {
     const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
     const res = await zkappWorkerClient.fetchAccount({ publicKey: publicKey });
     const accountExists = res.error == null;
+    await zkappWorkerClient.loadContract();
+    await zkappWorkerClient.compileContract();
+
     const zkappPublicKey = PublicKey.fromBase58(ZKAPP_ADDRESS);
     await zkappWorkerClient.initZkappInstance(zkappPublicKey);
     await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });

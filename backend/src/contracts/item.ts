@@ -36,6 +36,8 @@ export const MerkleMapProgram = ZkProgram({
 export let merkleProof_ = ZkProgram.Proof(MerkleMapProgram);
 export class MerkleProof extends merkleProof_ {}
 
+let merkleMap = new MerkleMap();
+
 export class Item extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();
   @state(Field) endTime = State<Field>();
@@ -43,11 +45,15 @@ export class Item extends SmartContract {
 
   init() {
     super.init();
-    this.merkleMapRoot.set(Field(0));
+    this.merkleMapRoot.set(merkleMap.getRoot());
   }
 
   @method async checkNumber(number: Field){
     number.assertEquals(Field(10))
+  }
+
+  @method async setRoot(root: Field){
+    this.merkleMapRoot.set(root)
   }
 
   @method async updateRoot(proof: MerkleProof) {
