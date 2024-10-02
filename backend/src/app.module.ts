@@ -22,7 +22,7 @@ import { Item } from './item/item.entity';
     entities: [Item, AuctionLog],
     synchronize: true,
   }), ItemsModule, AuctionLogsModule, ],
-  controllers: [AppController, ItemsController],
-  providers: [AppService, ItemService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

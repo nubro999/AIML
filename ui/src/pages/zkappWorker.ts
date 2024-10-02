@@ -93,6 +93,7 @@ const functions = {
     states.Item = Item;
   },
   compileContract: async (args: {}) => {
+    console.log('compiling...');
     await MerkleMapProgram.compile();
   
     if (states.Item) {

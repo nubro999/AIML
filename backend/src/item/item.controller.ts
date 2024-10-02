@@ -1,5 +1,6 @@
 import { Controller, Get, Post, HttpException, HttpStatus } from '@nestjs/common';
 import { ItemService } from './item.service';
+import { MerkleMap } from 'o1js';
 
 @Controller('items')
 export class ItemsController {
@@ -25,6 +26,14 @@ export class ItemsController {
     } catch (error) {
       throw new HttpException('Failed to deploy Item contract', HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Get('/map')
+  getMerkleMap(): string {
+    const mmap = new MerkleMap();
+    
+    console.log(mmap.getRoot().toString())
+    return "Hello from map";
   }
 
   

@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 import bidStyles from '../../styles/Bid.module.css';
+import ZkappWorkerClient from '../zkappWorkerClient';
+import { Field, PublicKey } from 'o1js';
+
+
+const ZKAPP_ADDRESS = 'B62qo5pT5pooYvwcmZ44BSMwpBNNpDtyqqe9GLXceTvY4T5f9Dj2xRr';
 
 interface Auction {
   id: number;
@@ -17,6 +22,18 @@ export default function Bid() {
   const { id } = router.query;
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidAmount, setBidAmount] = useState('');
+  const [displayText, setDisplayText] = useState('');
+  const [transactionJSON, setTransactionJSON] = useState('');
+  const [state, setState] = useState({
+    zkappWorkerClient: null as null | ZkappWorkerClient,
+    hasWallet: null as null | boolean,
+    hasBeenSetup: false,
+    accountExists: false,
+    currentNum: null as null | Field,
+    publicKey: null as null | PublicKey,
+    zkappPublicKey: null as null | PublicKey,
+    creatingTransaction: false,
+  });
 
   useEffect(() => {
     if (id) {
@@ -31,12 +48,64 @@ export default function Bid() {
     }
   }, [id]);
 
-  const handleBid = (e: React.FormEvent) => {
+  const handleBid = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would send the bid to your backend
-    console.log(`Placed bid of $${bidAmount} on auction ${id}`);
-    // Update the current bid or show a success message
+    if (!state.hasBeenSetup) {
+      setDisplayText('Setting up ZkApp...');
+      await setupZkApp();
+    }
+    setDisplayText('Creating transaction...');
+    setState({ ...state, creatingTransaction: true });
+    console.log(`Placing bid of $${bidAmount} on auction ${id}`);
+    
+    try {
+      await state.zkappWorkerClient!.fetchAccount({ publicKey: state.publicKey! });
+      await state.zkappWorkerClient!.createUpdateTransaction();
+      setDisplayText('Proving transaction...');
+      await state.zkappWorkerClient!.proveUpdateTransaction();
+      setDisplayText('Getting transaction JSON...');
+      const transactionJSON = await state.zkappWorkerClient!.getTransactionJSON() as string;
+      setTransactionJSON(transactionJSON);
+      setDisplayText('Transaction created! Send this transaction JSON to the backend.');
+      setState({ ...state, creatingTransaction: false });
+    } catch (error) {
+      console.error(error);
+      setDisplayText('Error creating transaction');
+      setState({ ...state, creatingTransaction: false });
+    }
+  }, [state, bidAmount, id]);
+
+  
+  const setupZkApp = async () => {
+    const zkappWorkerClient = new ZkappWorkerClient();
+    await zkappWorkerClient.setActiveInstanceToDevnet();
+    await zkappWorkerClient.loadContract();
+    await zkappWorkerClient.compileContract();
+    const mina = (window as any).mina;
+    if (mina == null) {
+      setState({ ...state, hasWallet: false });
+      return;
+    }
+    const publicKeyBase58 = await mina.requestAccounts();
+    const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
+    const res = await zkappWorkerClient.fetchAccount({ publicKey: publicKey });
+    const accountExists = res.error == null;
+    const zkappPublicKey = PublicKey.fromBase58(ZKAPP_ADDRESS);
+    await zkappWorkerClient.initZkappInstance(zkappPublicKey);
+    await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
+    const currentNum = await zkappWorkerClient.getMerkleMapRoot();
+    setState({
+      ...state,
+      zkappWorkerClient,
+      hasWallet: true,
+      hasBeenSetup: true,
+      publicKey,
+      zkappPublicKey,
+      accountExists,
+      currentNum,
+    });
   };
+
 
   if (!auction) return <div>Loading...</div>;
 
