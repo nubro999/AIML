@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
-import { AccountUpdate, Mina, PrivateKey, PublicKey } from 'o1js';
+import { AccountUpdate, MerkleMap, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Item, MerkleMapProgram } from "../contracts/item.js";
 import { ItemRepository } from "./item.repository.js";
+import { CreateItemDto } from "./dto/create-item.dto.js";
 
 @Injectable()
 export class ItemService {
@@ -76,23 +77,34 @@ export class ItemService {
     }
   }
 
-  async AddItem(name: string, description: string, minimumPrice: number, endTime: Date, merkleMapRoot: string){
-
-    console.log("adding item..")
-
-    const newItem = this.itemRepository.save({
-      name: name,
-      description: description,
-      minimumPrice: minimumPrice,
-      endTime: endTime,
-      merkleMapRoot: merkleMapRoot || '', // Assuming this is set later or has a default
-
-    })
-    
-
-
+  async AddItem(createItemDto: CreateItemDto) {
+    try {
+      const map = new MerkleMap();
+      console.log("adding item..");
+  
+      const newItem = await this.itemRepository.save({
+        name: createItemDto.name,
+        description: createItemDto.description,
+        minimumPrice: createItemDto.minimumPrice,
+        endTime: createItemDto.endTime,
+        merkleMap: "none",
+        merkleMapRoot: map.getRoot().toString(),
+      });
+  
+      console.log("Item added successfully:", newItem);
+      return newItem;
+  
+    } catch (error: unknown) {
+      console.error("Error adding item:", error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to add item: ${error.message}`);
+      } else {
+        throw new Error('Failed to add item: An unknown error occurred');
+      }
+    }
   }
-
+  
+  
   async UpdateMerkleMapRoot(){
 
   }

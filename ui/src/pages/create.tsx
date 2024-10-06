@@ -15,14 +15,38 @@ interface Auction {
 export default function Create() {
   const router = useRouter();
 
-  const handleCreateAuction = (newAuction: Omit<Auction, 'id'>) => {
-    const storedAuctions = localStorage.getItem('auctions');
-    const auctions = storedAuctions ? JSON.parse(storedAuctions) : [];
-    const auctionWithId = { ...newAuction, id: Date.now() };
-    const updatedAuctions = [...auctions, auctionWithId];
-    localStorage.setItem('auctions', JSON.stringify(updatedAuctions));
-    router.push('/auctions');
+  const handleCreateAuction = async (newAuction: Omit<Auction, 'id'>) => {
+    try {
+      const itemData = {
+        name: newAuction.title,
+        description: "Description of the item",
+        minimumPrice: newAuction.currentBid,
+        endTime: newAuction.endTime
+      };
+  
+      const response = await fetch('http://localhost:3001/items/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(itemData),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to create auction: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}`);
+      }
+  
+      const createdAuction = await response.json();
+      console.log('Auction created:', createdAuction);
+      
+      router.push('/auctions');
+    } catch (error) {
+      console.error('Error creating auction:', error);
+      // You might want to show an error message to the user here
+    }
   };
+  
 
   return (
     <div className={styles.container}>

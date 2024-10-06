@@ -1,6 +1,7 @@
-import { Controller, Get, Post, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, HttpException, HttpStatus, Body, ValidationPipe } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { MerkleMap } from 'o1js';
+import { CreateItemDto } from './dto/create-item.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -36,5 +37,21 @@ export class ItemsController {
     return "Hello from map";
   }
 
+  @Post('/create')
+  async createItem(@Body() createItemDto: CreateItemDto) {
+    console.log("create")
+    try {
+      const newItem = await this.itemService.AddItem(createItemDto);
+      return {
+        message: 'Item created successfully',
+        item: newItem,
+      };
+    } catch (error) {
+      throw new Error(`Failed to create item: ${(error as Error).message}`);
+    }
+  }
   
+
+
 }
+  

@@ -8,7 +8,7 @@ import ZkappWorkerClient from '../zkappWorkerClient';
 import { Field, PublicKey } from 'o1js';
 
 
-const ZKAPP_ADDRESS = 'B62qmxEjRMdcmN3JNGPF2oZ3NsQZB1Cm583uoXfAmNSiMqsxckcf7mn';
+const ZKAPP_ADDRESS = 'B62qjLwEAouZxtiGdQdgKv7vgCVay4fcCAB3Ai9JrPCZiy11Q5ZQgPZ';
 
 interface Auction {
   id: number;

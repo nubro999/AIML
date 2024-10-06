@@ -5,8 +5,8 @@
       "networkId": "testnet",
       "url": "https://api.minascan.io/node/devnet/v1/graphql",
       "keyPath": "keys/item.json",
-      "feepayerKeyPath": "C:\\Users\\82106/.cache/zkapp-cli/keys/fuck.json",
-      "feepayerAlias": "fuck",
+      "feepayerKeyPath": "C:\\Users\\82106/.cache/zkapp-cli/keys/filming.json",
+      "feepayerAlias": "filming",
       "fee": "0.1"
     }
   }
