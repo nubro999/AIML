@@ -1,4 +1,4 @@
-import { Controller, Get, Post, HttpException, HttpStatus, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, HttpException, HttpStatus, Body, ValidationPipe, Param } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { MerkleMap } from 'o1js';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -52,6 +52,34 @@ export class ItemsController {
   }
   
 
+  @Get('/running')
+  async getRunningAuctions() {
+    try {
+      const runningAuctions = await this.itemService.getRunningAuctions();
+      return runningAuctions;
+    } catch (error) {
+      throw new HttpException('Failed to fetch running auctions', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('/:id')
+  async getAuctionDetails(@Param('id') id: number) {
+    try {
+      const auctionDetails = await this.itemService.getAuctionDetails(id);
+      if (!auctionDetails) {
+        throw new HttpException('Auction not found', HttpStatus.NOT_FOUND);
+      }
+      return auctionDetails;
+    } catch (error) {
+      throw new HttpException('Failed to fetch auction details', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('/a')
+  async test(){
+    const auctionDetails = await this.itemService.getAuctionDetails(1);
+
+  }
 
 }
   

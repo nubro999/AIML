@@ -12,6 +12,9 @@ export class AuctionLog {
   @JoinColumn({ name: 'item_id' })
   item: Item;
 
+  @Column()
+  key: number;
+
   @Column('decimal', { precision: 10, scale: 2 })
   bidAmount: number;
 

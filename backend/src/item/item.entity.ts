@@ -16,6 +16,9 @@ export class Item {
   @Column()
   merkleMapRoot: string;
 
+  @Column()
+  zkappAddress: string;
+
   @Column('text')
   description: string;
 

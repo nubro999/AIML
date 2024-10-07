@@ -8,7 +8,6 @@ import {
   NetworkId
 } from 'o1js';
 import { Add } from './contracts/add';
-import { Item } from './contracts/item';
 const DEFAULT_NETWORK_ID = 'testnet';
 
 type Config = {

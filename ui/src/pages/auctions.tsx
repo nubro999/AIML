@@ -7,24 +7,37 @@ import { useRouter } from 'next/router';
 
 interface Auction {
   id: number;
-  title: string;
-  currentBid: number;
+  name: string;
+  description: string;
+  minimumPrice: number;
   endTime: string;
 }
 
 export default function Auctions() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Dummy data for active auctions
-    const dummyAuctions: Auction[] = [
-      { id: 4, title: "Modern Art Painting", currentBid: 750, endTime: "2023-04-10" },
-      { id: 5, title: "Luxury Handbag", currentBid: 400, endTime: "2023-04-11" },
-      { id: 6, title: "Signed Sports Jersey", currentBid: 300, endTime: "2023-04-12" },
-    ];
-    setAuctions(dummyAuctions);
+    fetchAuctions();
   }, []);
+
+  const fetchAuctions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:3001/items/running'); // Adjust this URL to match your backend API endpoint
+      if (!response.ok) {
+        throw new Error('Failed to fetch auctions');
+      }
+      const data = await response.json();
+      setAuctions(data);
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching auctions. Please try again later.');
+      setLoading(false);
+    }
+  };
 
   const handleAuctionClick = (auctionId: number) => {
     router.push(`/bid/${auctionId}`);
@@ -46,15 +59,16 @@ export default function Auctions() {
           <Link href="/">Home</Link>
           <Link href="/auctions">Auctions</Link>
           <Link href="/create">Create Auction</Link>
-          <Link href="/finished-auctions">
-            <button className={styles.button}>Finished Auctions</button>
-          </Link>
         </nav>
       </header>
 
       <main className={styles.main}>
         <h2 className={styles.title}>Current Auctions</h2>
-        {auctions.length > 0 ? (
+        {loading ? (
+          <p>Loading auctions...</p>
+        ) : error ? (
+          <p className={styles.error}>{error}</p>
+        ) : auctions.length > 0 ? (
           <div className={auctionStyles.auctionScrollContainer}>
             <div className={auctionStyles.auctionRow}>
               {auctions.map((auction) => (
@@ -63,9 +77,10 @@ export default function Auctions() {
                   className={auctionStyles.auctionItem}
                   onClick={() => handleAuctionClick(auction.id)}
                 >
-                  <h3>{auction.title}</h3>
-                  <p>Current Bid: ${auction.currentBid}</p>
-                  <p>End Time: {auction.endTime}</p>
+                  <h3>{auction.name}</h3>
+                  <p>{auction.description}</p>
+                  <p>Minimum Price: ${auction.minimumPrice}</p>
+                  <p>End Time: {new Date(auction.endTime).toLocaleString()}</p>
                 </button>
               ))}
             </div>

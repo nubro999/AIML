@@ -12,8 +12,8 @@ const ZKAPP_ADDRESS = 'B62qjLwEAouZxtiGdQdgKv7vgCVay4fcCAB3Ai9JrPCZiy11Q5ZQgPZ';
 
 interface Auction {
   id: number;
+  minimumPrice: number;
   title: string;
-  currentBid: number;
   endTime: string;
 }
 
@@ -22,8 +22,11 @@ export default function Bid() {
   const { id } = router.query;
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidAmount, setBidAmount] = useState('');
-  const [displayText, setDisplayText] = useState('');
+  const [bidKey, setBidKey] = useState('');
+    const [displayText, setDisplayText] = useState('');
   const [transactionJSON, setTransactionJSON] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState({
     zkappWorkerClient: null as null | ZkappWorkerClient,
     hasWallet: null as null | boolean,
@@ -38,17 +41,25 @@ export default function Bid() {
 
   useEffect(() => {
     if (id) {
-      // Fetch auction details from an API
-      // This is a mock implementation
-      setAuction({
-        id: Number(id),
-        title: `Auction Item ${id}`,
-        currentBid: 100,
-        endTime: new Date(Date.now() + 86400000).toISOString(),
-      });
+      fetchAuctionDetails();
     }
   }, [id]);
 
+  const fetchAuctionDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3001/items/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch auction details');
+      }
+      const data = await response.json();
+      setAuction(data);
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching auction details. Please try again later.');
+      setLoading(false);
+    }
+  };
   const handleBid = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!state.hasBeenSetup) {
@@ -151,20 +162,30 @@ export default function Bid() {
       <main className={styles.main}>
         <h2 className={styles.title}>{auction.title}</h2>
         <div className={bidStyles.auctionDetails}>
-          <p>Current Bid: ${auction.currentBid}</p>
+          <p>Minimum Price: {auction.minimumPrice} Mina</p>
           <p>Ends at: {new Date(auction.endTime).toLocaleString()}</p>
         </div>
         <form onSubmit={handleBid} className={bidStyles.bidForm}>
+
+          <input
+            type="number"
+            value={bidKey}
+            onChange={(e) => setBidKey(e.target.value)}
+            placeholder="Enter your bid key"
+            required
+          />
           <input
             type="number"
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value)}
             placeholder="Enter bid amount"
             required
-            min={auction.currentBid + 1}
+            min={auction.minimumPrice + 0.01}
+            step="0.01"
           />
           <button type="submit">Place Bid</button>
         </form>
+
       </main>
 
       <footer className={styles.footer}>

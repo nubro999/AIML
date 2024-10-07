@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
 import { AccountUpdate, MerkleMap, Mina, PrivateKey, PublicKey } from 'o1js';
-import { Item, MerkleMapProgram } from "../contracts/item.js";
+import { ItemContract, MerkleMapProgram } from "../contracts/item.js";
 import { ItemRepository } from "./item.repository.js";
 import { CreateItemDto } from "./dto/create-item.dto.js";
+import { MoreThan } from "typeorm";
+import { Item } from "./item.entity.js";
 
 @Injectable()
 export class ItemService {
@@ -14,7 +16,7 @@ export class ItemService {
   private fee: number;
   private feepayerAddress: PublicKey;
   private zkAppAddress: PublicKey;
-  private zkApp: Item;
+  private zkApp: ItemContract;
 
   constructor(private readonly itemRepository: ItemRepository) {}
 
@@ -43,10 +45,10 @@ export class ItemService {
 
     this.feepayerAddress = this.feepayerKey.toPublicKey();
     this.zkAppAddress = this.zkAppKey.toPublicKey();
-    this.zkApp = new Item(this.zkAppAddress);
+    this.zkApp = new ItemContract(this.zkAppAddress);
 
     await MerkleMapProgram.compile();
-    await Item.compile();
+    await ItemContract.compile();
   }
 
   async DeployMinaContract() {
@@ -103,11 +105,31 @@ export class ItemService {
       }
     }
   }
-  
-  
-  async UpdateMerkleMapRoot(){
+  async getAuctionDetails(id: number): Promise<Item | null> {
+    try {
+        return await this.itemRepository.findById(id);
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Failed to fetch auction details: ${error.message}`);
+        } else {
+            throw new Error('Failed to fetch auction details: Unknown error');
+        }
+    }
+}
 
+
+  async getRunningAuctions() {
+    const currentTime = new Date();
+    return this.itemRepository.find({
+      where: {
+        endTime: MoreThan(currentTime)
+      },
+      order: {
+        endTime: 'ASC'
+      }
+    });
   }
+  
 
   
   

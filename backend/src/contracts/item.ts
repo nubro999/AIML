@@ -38,7 +38,7 @@ export class MerkleProof extends merkleProof_ {}
 
 let merkleMap = new MerkleMap();
 
-export class Item extends SmartContract {
+export class ItemContract extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();
   @state(Field) endTime = State<Field>();
   @state(PublicKey) ItemOwner = State<PublicKey>();
