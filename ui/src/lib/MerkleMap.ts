@@ -16,7 +16,7 @@ originalMap.set(Field(7), Field(20));
 
 
 // Serialize the MerkleMap
-const serializedMap: string = JSON.stringify(
+export const serializedMap = JSON.stringify(
   {
     root: originalMap.root.toJSON(),
     length: originalMap.length.toJSON(),
@@ -41,7 +41,7 @@ const serializedMap: string = JSON.stringify(
 console.log("serializedMap:", serializedMap);
 
 // Deserialize and recreate the MerkleMap
-function recreateMerkleMap(serializedMap: string): MerkleMap {
+export function recreateMerkleMap(serializedMap: string): MerkleMap {
   const json = JSON.parse(serializedMap);
   const nodes = JSON.parse(json.nodes, (_, v) => {
     if (typeof v === "string" && v[0] === "n") {

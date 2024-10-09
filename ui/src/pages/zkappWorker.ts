@@ -1,3 +1,4 @@
+import { recreateMerkleMap, serializedMap } from '@/lib/MerkleMap';
 import { Field, JsonProof, MerkleMap, MerkleMapWitness, Mina, PublicKey, SmartContract, State, Struct, ZkProgram, fetchAccount, method, state } from 'o1js';
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
@@ -129,6 +130,7 @@ const functions = {
     console.log("number10" + number10)
     return JSON.stringify(currentNum.toJSON());
   },
+
   createUpdateRootTransaction: async (args: { proof: JsonProof }) => {
 
       console.log('Creating MerkleMap and initial state...');
@@ -187,6 +189,7 @@ const functions = {
     return states.transaction!.toJSON();
   },
 };
+
 
 // ---------------------------------------------------------------------------------------
 
