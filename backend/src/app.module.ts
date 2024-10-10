@@ -9,6 +9,7 @@ import { ItemService } from './item/item.service';
 import { AuctionLogsModule } from './auction-log/auction-log.module';
 import { AuctionLog } from './auction-log/auction-log.entity';
 import { Item } from './item/item.entity';
+import { MerkleMapModule } from './merkle-map/merkle-map.module';
 
 // B62qo23u5UYxJTw4Tni1pLLEHzTQEhh5fNSghHtkQowzNmQHrkJPSBk
 @Module({
@@ -21,7 +22,7 @@ import { Item } from './item/item.entity';
     database: 'silentauction',
     entities: [Item, AuctionLog],
     synchronize: true,
-  }), ItemsModule, AuctionLogsModule, ],
+  }), ItemsModule, AuctionLogsModule, MerkleMapModule, ],
   controllers: [AppController],
   providers: [AppService],
 })

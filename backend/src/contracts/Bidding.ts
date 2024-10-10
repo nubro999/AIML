@@ -1,30 +1,36 @@
 import { Field, SmartContract, state, State, method, CircuitString, UInt64, PublicKey, MerkleMap, MerkleMapWitness, Struct, Proof, SelfProof, ZkProgram } from 'o1js';
 
-class MerkleMapUpdate extends Struct({
+
+
+
+class Bid extends Struct({
   key: Field,
   value: Field,
   witness: MerkleMapWitness,
 }) {}
 
-export const MerkleMapProgram = ZkProgram({
-  name: 'MerkleMapProgram',
+export const BiddingProgram = ZkProgram({
+  name: 'BiddingProgram',
   publicInput: Field,
   publicOutput: Field,
 
   methods: {
-    update: {
-      privateInputs: [MerkleMapUpdate],
+    placeBid: {
+      privateInputs: [Bid],
 
-      async method(oldRoot: Field, update: MerkleMapUpdate) {
-        const { key, value, witness } = update;
+      async method(oldRoot: Field, bid: Bid) {
+        const { key, value, witness } = bid;
 
-        // 증인이 올드 루트와 일치하는지 확인
-        const [rootBefore, key0] = witness.computeRootAndKey(Field(0));
-        rootBefore.assertEquals(oldRoot);
-        key0.assertEquals(key);
+        // Verify the old root
+        const [computedRoot, computedKey] = witness.computeRootAndKey(Field(0));
+        computedRoot.assertEquals(oldRoot);
 
-        // 새 값으로 새 루트 계산
-        const newRoot = witness.computeRootAndKey(value)[0];
+        // Compute the new root
+        const [newRoot] = witness.computeRootAndKey(value);
+
+        // Optionally, you can add more constraints here
+        // For example, ensure the bid value is positive
+        value.assertGreaterThan(Field(0));
 
         return newRoot;
       },
@@ -32,13 +38,12 @@ export const MerkleMapProgram = ZkProgram({
   },
 });
 
-
-export let merkleProof_ = ZkProgram.Proof(MerkleMapProgram);
-export class MerkleProof extends merkleProof_ {}
+export let biddingProof_ = ZkProgram.Proof(BiddingProgram);
+export class BiddingProof extends biddingProof_ {}
 
 let merkleMap = new MerkleMap();
 
-export class ItemContract extends SmartContract {
+export class BiddingContract extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();
   @state(Field) endTime = State<Field>();
   @state(PublicKey) ItemOwner = State<PublicKey>();
@@ -48,15 +53,7 @@ export class ItemContract extends SmartContract {
     this.merkleMapRoot.set(merkleMap.getRoot());
   }
 
-  @method async checkNumber(number: Field){
-    number.assertEquals(Field(10))
-  }
-
-  @method async setRoot(root: Field){
-    this.merkleMapRoot.set(root)
-  }
-
-  @method async updateRoot(proof: MerkleProof) {
+  @method async updateRoot(proof: BiddingProof) {
     // ZkProgram의 증명 검증
     proof.verify();
 
