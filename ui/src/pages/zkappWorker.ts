@@ -1,38 +1,40 @@
-import { recreateMerkleMap, serializedMap } from '@/lib/MerkleMap';
 import { Field, JsonProof, MerkleMap, MerkleMapWitness, Mina, PublicKey, SmartContract, State, Struct, ZkProgram, fetchAccount, method, state } from 'o1js';
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
 
+const map = new MerkleMap();
+map.set(Field(5678), Field(1500))
 
-
-class MerkleMapUpdate extends Struct({
+class Bid extends Struct({
   key: Field,
   value: Field,
   witness: MerkleMapWitness,
 }) {}
 
-
-export const MerkleMapProgram = ZkProgram({
-  name: 'MerkleMapProgram',
+export const BiddingProgram = ZkProgram({
+  name: 'BiddingProgram',
   publicInput: Field,
   publicOutput: Field,
 
   methods: {
-    update: {
-      privateInputs: [MerkleMapUpdate],
+    placeBid: {
+      privateInputs: [Bid],
 
-      async method(oldRoot: Field, update: MerkleMapUpdate) {
-        const { key, value, witness } = update;
+      async method(oldRoot: Field, bid: Bid) {
+        const { key, value, witness } = bid;
 
-        // 증인이 올드 루트와 일치하는지 확인
-        const [rootBefore, key0] = witness.computeRootAndKey(Field(0));
-        rootBefore.assertEquals(oldRoot);
-        key0.assertEquals(key);
+        // Verify the old root
+        const [computedRoot, computedKey] = witness.computeRootAndKey(Field(0));
+        computedRoot.assertEquals(oldRoot);
 
-        // 새 값으로 새 루트 계산
-        const newRoot = witness.computeRootAndKey(value)[0];
+        // Compute the new root
+        const [newRoot] = witness.computeRootAndKey(value);
+
+        // Optionally, you can add more constraints here
+        // For example, ensure the bid value is positive
+        value.assertGreaterThan(Field(0));
 
         return newRoot;
       },
@@ -40,13 +42,12 @@ export const MerkleMapProgram = ZkProgram({
   },
 });
 
-
-export let merkleProof_ = ZkProgram.Proof(MerkleMapProgram);
-export class MerkleProof extends merkleProof_ {}
+export let biddingProof_ = ZkProgram.Proof(BiddingProgram);
+export class BiddingProof extends biddingProof_ {}
 
 let merkleMap = new MerkleMap();
 
-export class Item extends SmartContract {
+export class BiddingContract extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();
   @state(Field) endTime = State<Field>();
   @state(PublicKey) ItemOwner = State<PublicKey>();
@@ -56,15 +57,7 @@ export class Item extends SmartContract {
     this.merkleMapRoot.set(merkleMap.getRoot());
   }
 
-  @method async checkNumber(number: Field){
-    number.assertEquals(Field(10))
-  }
-
-  @method async setRoot(root: Field){
-    this.merkleMapRoot.set(root)
-  }
-
-  @method async updateRoot(proof: MerkleProof) {
+  @method async updateRoot(proof: BiddingProof) {
     // ZkProgram의 증명 검증
     proof.verify();
 
@@ -79,9 +72,9 @@ export class Item extends SmartContract {
 }
 
 const states = {
-  Item: null as null | typeof Item,
-  MerkleMapProgram: MerkleMapProgram,
-  zkapp: null as null | Item,
+  BiddingContract: null as null | typeof BiddingContract,
+  BiddingProgram: BiddingProgram,
+  zkapp: null as null | BiddingContract,
   transaction: null as null | Transaction,
 };
 
@@ -98,15 +91,15 @@ const functions = {
     Mina.setActiveInstance(Network);
   },
   loadContract: async (args: {}) => {
-    states.Item = Item;
+    states.BiddingContract = BiddingContract;
   },
   compileContract: async (args: {}) => {
     console.log('compiling...');
-    await MerkleMapProgram.compile();
+    await BiddingProgram.compile();
   
-    if (states.Item) {
+    if (states.BiddingContract) {
 
-      await states.Item.compile();
+      await states.BiddingContract.compile();
       console.log('Item contract compiled successfully.');
     } else {
       console.error('Item contract is not loaded.');
@@ -118,68 +111,65 @@ const functions = {
   },
   initZkappInstance: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
-    states.zkapp = new states.Item!(publicKey);
+    states.zkapp = new states.BiddingContract!(publicKey);
   },
   getMerkleMapRoot: async (args: {}) => {
     const currentNum = await states.zkapp!.merkleMapRoot.get();
     const currentab = await states.zkapp!.endTime.get();
-    const number10 = await states.zkapp!.checkNumber(Field(10));
 
     console.log("endtime" + currentab)
 
-    console.log("number10" + number10)
     return JSON.stringify(currentNum.toJSON());
   },
+  
+  createUpdateRootTransaction : async (args: { 
+    key: string | number, 
+    value: string | number, 
+    currentRoot: string 
+  }) => {
+    try {
+  
+      // Convert the current root to a Field
+      let currentRoot = map.getRoot();
 
-  createUpdateRootTransaction: async (args: { proof: JsonProof }) => {
-
-      console.log('Creating MerkleMap and initial state...');
-      const map = new MerkleMap();
-
-      // Set initial value
-      const initialKey = Field(1);
-      const initialValue = Field(0);
-      map.set(initialKey, initialValue);
-
-      const initialRoot = map.getRoot();
-      console.log('Initial root:', initialRoot.toString());
-
-      console.log('Generating witness for update...');
-      const newValue = Field(20);
-      const witness = map.getWitness(initialKey);
-
-      console.log('Current value at key:', map.get(initialKey).toString());
-      console.log('New value to set:', newValue.toString());
+      console.log('Initial root:', currentRoot.toString());
+      
+      const witness = map.getWitness( Field(9101));
 
       console.log('Creating proof of update...');
-      const _proof = await MerkleMapProgram.update(initialRoot, {
-        key: initialKey,
-        value: newValue,
-        witness: witness
-      });
 
-      console.log('Proof Generated');
+      const proof = await BiddingProgram.placeBid(currentRoot, {
+        key: Field(9101),
+        value: Field(2000),
+        witness: witness,
+       });
 
-      console.log('transaction shot')
+        // Update the map and root
+      map.set(Field(5678), Field(1500));
+      currentRoot = proof.publicOutput;
+
+  
+      console.log('Creating transaction...');
       const transaction = await Mina.transaction(async () => {
-        states.zkapp!.updateRoot(_proof);
+        // Assuming your contract has an updateRoot method that takes a Proof
+        states.zkapp!.updateRoot(proof);
       });
-      states.transaction = transaction;
-      console.log('transaction complete: ' + transaction)
-
-      await transaction.prove()
-
+  
+      console.log('Transaction created');
+  
+      await transaction.prove();
+  
+      console.log('Transaction proved');
+  
       const transactionJSON = await transaction.toJSON();
       
       return transactionJSON;
-
-  },
-
-  setRoot: async () => {
-    const setRoot = await states.zkapp!.setRoot(Field(22731122946631793544306773678309960639073656601863129978322145324846701682624));
-    
-    const currentNum = await states.zkapp!.merkleMapRoot.get();
-    return JSON.stringify(currentNum.toJSON());
+  
+    } catch (error) {
+      console.error('An error occurred:', 
+        error instanceof Error ? error.message : String(error));
+      throw error;
+    }
   },
 
   proveUpdateRootTransaction: async (args: {}) => {
@@ -189,7 +179,6 @@ const functions = {
     return states.transaction!.toJSON();
   },
 };
-
 
 // ---------------------------------------------------------------------------------------
 

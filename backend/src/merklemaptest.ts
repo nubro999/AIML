@@ -1,30 +1,33 @@
-import { Field, SmartContract, state, State, method, CircuitString, UInt64, PublicKey, MerkleMap, MerkleMapWitness, Struct, Proof, SelfProof, ZkProgram, verify } from 'o1js';
+import { Field, Struct, MerkleMapWitness, ZkProgram, Poseidon, MerkleMap } from 'o1js';
 
-class MerkleMapUpdate extends Struct({
+class Bid extends Struct({
   key: Field,
   value: Field,
   witness: MerkleMapWitness,
 }) {}
 
-export const MerkleMapProgram = ZkProgram({
-  name: 'MerkleMapProgram',
+export const BiddingProgram = ZkProgram({
+  name: 'BiddingProgram',
   publicInput: Field,
   publicOutput: Field,
 
   methods: {
-    update: {
-      privateInputs: [MerkleMapUpdate],
+    placeBid: {
+      privateInputs: [Bid],
 
-      async method(oldRoot: Field, update: MerkleMapUpdate) {
-        const { key, value, witness } = update;
+      async method(oldRoot: Field, bid: Bid) {
+        const { key, value, witness } = bid;
 
-        // 증인이 올드 루트와 일치하는지 확인
-        const [rootBefore, key0] = witness.computeRootAndKey(Field(0));
-        rootBefore.assertEquals(oldRoot);
-        key0.assertEquals(key);
+        // Verify the old root
+        const [computedRoot, computedKey] = witness.computeRootAndKey(Field(0));
+        computedRoot.assertEquals(oldRoot);
 
-        // 새 값으로 새 루트 계산
-        const newRoot = witness.computeRootAndKey(value)[0];
+        // Compute the new root
+        const [newRoot] = witness.computeRootAndKey(value);
+
+        // Optionally, you can add more constraints here
+        // For example, ensure the bid value is positive
+        value.assertGreaterThan(Field(0));
 
         return newRoot;
       },
@@ -33,67 +36,56 @@ export const MerkleMapProgram = ZkProgram({
 });
 
 
-
-
 async function main() {
-    try {
-      console.log('Compiling ZkProgram...');
-      const { verificationKey } = await MerkleMapProgram.compile();
-  
-      console.log('Creating MerkleMap and initial state...');
-      const map = new MerkleMap();
-      
-      // Set initial value
-      const initialKey = Field(1);
-      const initialValue = Field(0);
-      map.set(initialKey, initialValue);
-  
-      const initialRoot = map.getRoot();
-      console.log('Initial root:', initialRoot.toString());
-  
-      console.log('Generating witness for update...');
-      const newValue = Field(20);
-      const witness = map.getWitness(initialKey);
-  
-      console.log('Current value at key:', map.get(initialKey).toString());
-      console.log('New value to set:', newValue.toString());
-  
-      console.log('Creating proof of update...');
-      try {
-        const proof = await MerkleMapProgram.update(initialRoot, {
-          key: initialKey,
-          value: newValue,
-          witness: witness
-        });
-  
-        console.log('Proof created successfully');
-        console.log('New root (from proof):', proof.publicOutput.toString());
-  
-        // Update the map and check the new root
-        map.set(initialKey, newValue);
-        const newMapRoot = map.getRoot();
-        console.log('New root (from map):', newMapRoot.toString());
-  
-        if (proof.publicOutput.equals(newMapRoot).toBoolean()) {
-          console.log('Proof output matches new map root');
-        } else {
-          console.log('Error: Proof output does not match new map root');
-        }
-  
-        console.log('Verifying proof...');
-        const verified = await verify(proof, verificationKey);
-        console.log('Proof verified:', verified);
-  
-      } catch (proofError) {
-        console.error('Error creating or verifying proof:', 
-          proofError instanceof Error ? proofError.message : String(proofError));
-      }
-  
-    } catch (error) {
-      console.error('An error occurred:', 
-        error instanceof Error ? error.message : String(error));
-    }
-}
-  
+  try {
+      console.log('Compiling BiddingProgram...');
+      const { verificationKey } = await BiddingProgram.compile();
 
-  main();
+      console.log('Creating initial MerkleMap...');
+      const map = new MerkleMap();
+      let currentRoot = map.getRoot();
+
+      console.log('Initial root:', currentRoot.toString());
+
+      // Simulate multiple bids
+      const bids = [
+          { key: Field(1234), value: Field(1000) },
+          { key: Field(5678), value: Field(1500) },
+          { key: Field(9101), value: Field(2000) },
+      ];
+
+      for (const bid of bids) {
+        
+          // Get witness before updating the map
+          const witness = map.getWitness(bid.key);
+
+          // Create proof
+          const proof = await BiddingProgram.placeBid(currentRoot, {
+              key: bid.key,
+              value: bid.value,
+              witness: witness,
+          });
+
+          // Verify the proof
+          const verificationResult = await BiddingProgram.verify(proof);
+          if (!verificationResult) {
+              throw new Error('Proof verification failed');
+          }
+
+          // Update the map and root
+          map.set(bid.key, bid.value);
+          currentRoot = proof.publicOutput;
+
+          console.log('Bid placed successfully');
+          console.log('New root:', currentRoot.toString());
+      }
+
+      console.log('Final Merkle root:', currentRoot.toString());
+
+  } catch (error) {
+      console.error('An error occurred:', 
+          error instanceof Error ? error.message : String(error));
+  }
+}
+
+main();
