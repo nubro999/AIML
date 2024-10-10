@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import fs from 'fs/promises';
 import { AccountUpdate, MerkleMap, Mina, PrivateKey, PublicKey } from 'o1js';
-import { ItemContract, MerkleMapProgram } from "../contracts/item.js";
+import { BiddingContract, BiddingProgram } from "../contracts/Bidding.js";
 import { ItemRepository } from "./item.repository.js";
 import { CreateItemDto } from "./dto/create-item.dto.js";
 import { MoreThan } from "typeorm";
@@ -16,7 +16,7 @@ export class ItemService {
   private fee: number;
   private feepayerAddress: PublicKey;
   private zkAppAddress: PublicKey;
-  private zkApp: ItemContract;
+  private zkApp: BiddingContract;
 
   constructor(private readonly itemRepository: ItemRepository) {}
 
@@ -26,10 +26,10 @@ export class ItemService {
 
   private async initializeConfig() {
     const configJson = JSON.parse(await fs.readFile('config.json', 'utf8'));
-    this.config = configJson.deployAliases['item'];
+    this.config = configJson.deployAliases['biddingcontract'];
     
     const feepayerKeysBase58 = JSON.parse(await fs.readFile(this.config.feepayerKeyPath, 'utf8'));
-    const zkAppKeysBase58 = JSON.parse(await fs.readFile("keys/item.json", 'utf8'));
+    const zkAppKeysBase58 = JSON.parse(await fs.readFile("keys/biddingcontract.json", 'utf8'));
 
     this.feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
     this.zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);
@@ -45,10 +45,10 @@ export class ItemService {
 
     this.feepayerAddress = this.feepayerKey.toPublicKey();
     this.zkAppAddress = this.zkAppKey.toPublicKey();
-    this.zkApp = new ItemContract(this.zkAppAddress);
+    this.zkApp = new BiddingContract(this.zkAppAddress);
 
-    await MerkleMapProgram.compile();
-    await ItemContract.compile();
+    await BiddingProgram.compile();
+    await BiddingContract.compile();
   }
 
   async DeployMinaContract() {
