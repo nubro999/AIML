@@ -4,11 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from '../../styles/Home.module.css';
-
-const LineChart = dynamic(
-  () => import('../../components/LineChart'),
-  { ssr: false }
-);
+  
 
 interface BidHistory {
   timestamp: string;
@@ -59,7 +55,6 @@ export default function AuctionHistory() {
       <main className={styles.main}>
         <h2 className={styles.title}>Auction #{id} Bid History</h2>
         <div className={styles.chartContainer}>
-          <LineChart bidHistory={bidHistory} auctionId={id as string} />
         </div>
       </main>
 

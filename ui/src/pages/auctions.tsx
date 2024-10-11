@@ -14,10 +14,12 @@ interface Auction {
 }
 
 export default function Auctions() {
+  
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     fetchAuctions();
@@ -26,7 +28,7 @@ export default function Auctions() {
   const fetchAuctions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/items/running'); // Adjust this URL to match your backend API endpoint
+      const response = await fetch(`${backendUrl}/items/running`); // Adjust this URL to match your backend API endpoint
       if (!response.ok) {
         throw new Error('Failed to fetch auctions');
       }

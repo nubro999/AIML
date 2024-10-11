@@ -19,6 +19,8 @@ interface Auction {
 
 export default function Bid() {
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const { id } = router.query;
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidAmount, setBidAmount] = useState('');
@@ -46,9 +48,11 @@ export default function Bid() {
   }, [id]);
 
   const fetchAuctionDetails = async () => {
+
+
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/items/${id}`);
+      const response = await fetch(`${backendUrl}/items/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch auction details');
       }

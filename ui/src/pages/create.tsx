@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import CreateAuction from '../components/CreateAuction';
 import styles from '../styles/Home.module.css';
 
-interface Auction {
-  id: number;
+interface AuctionInput {
   title: string;
   currentBid: number;
   endTime: string;
@@ -14,9 +13,14 @@ interface Auction {
 
 export default function Create() {
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const handleCreateAuction = async (newAuction: Omit<Auction, 'id'>) => {
+  const handleCreateAuction = async (newAuction: AuctionInput) => {
     try {
+      if (!backendUrl) {
+        throw new Error('Backend URL is not defined in environment variables');
+      }
+
       const itemData = {
         name: newAuction.title,
         description: "Description of the item",
@@ -24,7 +28,7 @@ export default function Create() {
         endTime: newAuction.endTime
       };
   
-      const response = await fetch('http://localhost:3001/items/create', {
+      const response = await fetch(`${backendUrl}/items/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,10 +47,10 @@ export default function Create() {
       router.push('/auctions');
     } catch (error) {
       console.error('Error creating auction:', error);
-      // You might want to show an error message to the user here
+      // TODO: Implement proper error handling, e.g., showing an error message to the user
+      alert('Failed to create auction. Please try again.');
     }
   };
-  
 
   return (
     <div className={styles.container}>

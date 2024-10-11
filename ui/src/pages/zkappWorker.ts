@@ -5,7 +5,9 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 // ---------------------------------------------------------------------------------------
 
 const map = new MerkleMap();
-map.set(Field(5678), Field(1500))
+map.set(Field(1234), Field(1000))
+map.set(Field(5678), Field(1500)) // current 
+
 
 class Bid extends Struct({
   key: Field,
@@ -94,6 +96,7 @@ const functions = {
     states.BiddingContract = BiddingContract;
   },
   compileContract: async (args: {}) => {
+
     console.log('compiling...');
     await BiddingProgram.compile();
   
