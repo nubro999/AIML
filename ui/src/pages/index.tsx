@@ -1,10 +1,10 @@
+// pages/index.tsx
 import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import ZkappWorkerClient from './zkappWorkerClient';
 import { PublicKey, Field } from 'o1js';
-
+import Header from '../components/Header';
 
 export default function Home() {
   const [state, setState] = useState({
@@ -21,26 +21,9 @@ export default function Home() {
   const [displayText, setDisplayText] = useState('');
   const [transactionLink, setTransactionLink] = useState('');
 
-
-
   return (
     <div className={styles.container}>
-      <Head>
-        <title>AuctionHub</title>
-        <meta name="description" content="Bid on exciting items!" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <header className={styles.header}>
-        <Link href="/">
-          <h1>AuctionHub</h1>
-        </Link>
-        <nav>
-          <Link href="/">Home</Link>
-          <Link href="/auctions">Auctions</Link>
-          <Link href="/create">Create Auction</Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className={styles.main}>
         <section className={styles.hero}>

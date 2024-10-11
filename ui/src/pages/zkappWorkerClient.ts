@@ -43,12 +43,8 @@ export default class ZkappWorkerClient {
     return Field.fromJSON(JSON.parse(result as string));
   }
 
-  createUpdateRootTransaction() {
-    return this._call('createUpdateRootTransaction', {});
-  }
-
-  proveUpdateTransaction() {
-    return this._call('proveUpdateRootTransaction', {});
+  createUpdateRootTransaction(key: number | null, value: number | null) {
+    return this._call('createUpdateRootTransaction', { key, value });
   }
 
   async getTransactionJSON() {

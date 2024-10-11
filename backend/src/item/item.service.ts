@@ -4,7 +4,7 @@ import { AccountUpdate, MerkleMap, Mina, PrivateKey, PublicKey } from 'o1js';
 import { BiddingContract, BiddingProgram } from "../contracts/Bidding.js";
 import { ItemRepository } from "./item.repository.js";
 import { CreateItemDto } from "./dto/create-item.dto.js";
-import { MoreThan } from "typeorm";
+import { LessThan, MoreThan } from "typeorm";
 import { Item } from "./item.entity.js";
 
 @Injectable()
@@ -115,7 +115,7 @@ export class ItemService {
             throw new Error('Failed to fetch auction details: Unknown error');
         }
     }
-}
+  }
 
 
   async getRunningAuctions() {
@@ -123,6 +123,18 @@ export class ItemService {
     return this.itemRepository.find({
       where: {
         endTime: MoreThan(currentTime)
+      },
+      order: {
+        endTime: 'ASC'
+      }
+    });
+  }
+
+  async getFinishedAuctions() {
+    const currentTime = new Date();
+    return this.itemRepository.find({
+      where: {
+        endTime: LessThan(currentTime)
       },
       order: {
         endTime: 'ASC'
