@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import CreateAuction from '../components/CreateAuction';
 import styles from '../styles/Home.module.css';
+import Header from '@/components/Header';
 
 interface AuctionInput {
   title: string;
@@ -54,22 +55,7 @@ export default function Create() {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Create Auction - AuctionHub</title>
-        <meta name="description" content="Create a new auction" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <header className={styles.header}>
-        <Link href="/">
-          <h1>AuctionHub</h1>
-        </Link>
-        <nav>
-          <Link href="/">Home</Link>
-          <Link href="/auctions">Auctions</Link>
-          <Link href="/create">Create Auction</Link>
-        </nav>
-      </header>
+      <Header/>
 
       <main className={styles.main}>
         <h2 className={styles.title}>Create New Auction</h2>

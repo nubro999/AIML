@@ -1,72 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from '../styles/Home.module.css';
+import Header from '@/components/Header';
 
 interface FinishedAuction {
   id: number;
   title: string;
-  finalBid: number;
+  name: string;
+  description: string;
+  minimumPrice: number;
   endTime: string;
   winner: string;
 }
 
 export default function FinishedAuctions() {
-  const [finishedAuctions, setFinishedAuctions] = useState<FinishedAuction[]>([]);
+  const [auctions, setAuctions] = useState<FinishedAuction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
-    // Dummy data for finished auctions
-    const dummyFinishedAuctions: FinishedAuction[] = [
-      { id: 1, title: "Vintage Watch", finalBid: 500, endTime: "2023-04-01", winner: "user123" },
-      { id: 2, title: "Antique Vase", finalBid: 300, endTime: "2023-04-02", winner: "collector456" },
-      { id: 3, title: "Rare Comic Book", finalBid: 1000, endTime: "2023-04-03", winner: "comicfan789" },
-    ];
-    setFinishedAuctions(dummyFinishedAuctions);
+    fetchAuctions();
   }, []);
+
+  const fetchAuctions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${backendUrl}/items/finished`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch auctions');
+      }
+      const data = await response.json();
+      setAuctions(data);
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching auctions. Please try again later.');
+      setLoading(false);
+    }
+  };
 
   const handleAuctionClick = (id: number) => {
     router.push(`/auction-history/${id}`);
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Finished Auctions - AuctionHub</title>
-        <meta name="description" content="View finished auctions" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <header className={styles.header}>
-        <Link href="/">
-          <h1>AuctionHub</h1>
-        </Link>
-        <nav>
-          <Link href="/">Home</Link>
-          <Link href="/auctions">Auctions</Link>
-          <Link href="/create">Create Auction</Link>
-          <Link href="/finished-auctions">
-            <button className={styles.button}>Finished Auctions</button>
-          </Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className={styles.main}>
         <h2 className={styles.title}>Finished Auctions</h2>
-        {finishedAuctions.length > 0 ? (
+        {loading ? (
+          <p>Loading auctions...</p>
+        ) : error ? (
+          <p className={styles.error}>{error}</p>
+        ) : auctions.length > 0 ? (
           <div className={styles.auctionScrollContainer}>
             <div className={styles.auctionGrid}>
-              {finishedAuctions.map((auction) => (
+              {auctions.map((auction) => (
                 <div 
                   key={auction.id} 
                   className={styles.auctionBox}
                   onClick={() => handleAuctionClick(auction.id)}
                 >
-                  <h3>{auction.title}</h3>
-                  <p>Final Bid: ${auction.finalBid}</p>
-                  <p>End Time: {auction.endTime}</p>
-                  <p>Winner: {auction.winner}</p>
+                  <h3 className={styles.auctionTitle}>{auction.title}</h3>
+                  <p className={styles.auctionInfo}>Name: {auction.name}</p>
+                  <p className={styles.auctionInfo}>Description: {auction.description}</p>
+                  <p className={styles.auctionInfo}>MinimunPrice: {auction.minimumPrice}</p>
+                  <p className={styles.auctionInfo}>End Time: {formatDate(auction.endTime)}</p>
+                  <p className={styles.auctionInfo}>Winner: {auction.winner}</p>
                 </div>
               ))}
             </div>

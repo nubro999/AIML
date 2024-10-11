@@ -1,4 +1,7 @@
-import { Field, SmartContract, state, State, method, CircuitString, UInt64, PublicKey, MerkleMap, MerkleMapWitness, Struct, Proof, SelfProof, ZkProgram } from 'o1js';
+import { Field, SmartContract, state, State, method, CircuitString, UInt64, PublicKey,  MerkleMapWitness, Struct, Proof, SelfProof, ZkProgram, Experimental, Unconstrained, MerkleMap } from 'o1js';
+
+
+
 
 
 
@@ -42,6 +45,8 @@ export let biddingProof_ = ZkProgram.Proof(BiddingProgram);
 export class BiddingProof extends biddingProof_ {}
 
 let merkleMap = new MerkleMap();
+
+
 
 export class BiddingContract extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();

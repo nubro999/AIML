@@ -4,6 +4,7 @@ import Link from 'next/link';
 import styles from '../styles/Home.module.css';
 import auctionStyles from '../styles/Auctions.module.css';
 import { useRouter } from 'next/router';
+import Header from '@/components/Header';
 
 interface Auction {
   id: number;
@@ -28,7 +29,7 @@ export default function Auctions() {
   const fetchAuctions = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${backendUrl}/items/running`); // Adjust this URL to match your backend API endpoint
+      const response = await fetch(`${backendUrl}/items/running`); // Adjust this URL to match your backend API endpoint\
       if (!response.ok) {
         throw new Error('Failed to fetch auctions');
       }
@@ -47,22 +48,8 @@ export default function Auctions() {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Auctions - AuctionHub</title>
-        <meta name="description" content="View and bid on current auctions" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Header/>
 
-      <header className={styles.header}>
-        <Link href="/">
-          <h1>AuctionHub</h1>
-        </Link>
-        <nav>
-          <Link href="/">Home</Link>
-          <Link href="/auctions">Auctions</Link>
-          <Link href="/create">Create Auction</Link>
-        </nav>
-      </header>
 
       <main className={styles.main}>
         <h2 className={styles.title}>Current Auctions</h2>

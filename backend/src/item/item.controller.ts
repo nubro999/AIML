@@ -62,6 +62,16 @@ export class ItemsController {
     }
   }
 
+  @Get('/finished')
+  async getFinishedAuctions() {
+    try {
+      const finishedAuctions = await this.itemService.getFinishedAuctions();
+      return finishedAuctions;
+    } catch (error) {
+      throw new HttpException('Failed to fetch running auctions', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Get('/:id')
   async getAuctionDetails(@Param('id') id: number) {
     try {

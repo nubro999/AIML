@@ -15,13 +15,17 @@ export class AuctionLog {
   @Column()
   key: number;
 
+  @Column()
+  bidUser: string;
+
   @Column('decimal', { precision: 10, scale: 2 })
   bidAmount: number;
 
   @Column({ length: 100 })
-  bidderName: string;
+  transactionhash: string;
 
   @CreateDateColumn()
   bidTime: Date;
+
 
 }
