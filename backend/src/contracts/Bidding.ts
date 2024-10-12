@@ -25,11 +25,11 @@ export const BiddingProgram = ZkProgram({
         const { key, value, witness } = bid;
 
         // Verify the old root
-        const [computedRoot, computedKey] = witness.computeRootAndKey(Field(0));
+        const [computedRoot, computedKey] = witness.computeRootAndKeyV2(Field(0));
         computedRoot.assertEquals(oldRoot);
 
         // Compute the new root
-        const [newRoot] = witness.computeRootAndKey(value);
+        const [newRoot] = witness.computeRootAndKeyV2(value);
 
         // Optionally, you can add more constraints here
         // For example, ensure the bid value is positive

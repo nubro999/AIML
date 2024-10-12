@@ -85,11 +85,6 @@ export class ItemsController {
     }
   }
 
-  @Get('/a')
-  async test(){
-    const auctionDetails = await this.itemService.getAuctionDetails(1);
-
-  }
 
 }
   

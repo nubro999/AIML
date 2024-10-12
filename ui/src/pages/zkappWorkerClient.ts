@@ -47,10 +47,7 @@ export default class ZkappWorkerClient {
     return this._call('createUpdateRootTransaction', { key, value });
   }
 
-  async getTransactionJSON() {
-    const result = await this._call('getTransactionJSON', {});
-    return result;
-  }
+
 
   // ---------------------------------------------------------------------------------------
 

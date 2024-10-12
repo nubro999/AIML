@@ -10,6 +10,8 @@ export class AuctionLogRepository extends Repository<AuctionLog>{
     async findById(id: number): Promise<AuctionLog | null> {
         return this.findOne({ where: { id } });
     }
+
+    
     
 
 }

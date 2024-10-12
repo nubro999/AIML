@@ -6,6 +6,7 @@ import styles from '../../styles/Home.module.css';
 import bidStyles from '../../styles/Bid.module.css';
 import ZkappWorkerClient from '../zkappWorkerClient';
 import { Field, PublicKey } from 'o1js';
+import Header from '@/components/Header';
 
 
 const ZKAPP_ADDRESS = 'B62qpm9RdksBbjAWFxgzbJNhuh82KF56SfHtUc8CC56MK2MLcmUqXg7';
@@ -72,6 +73,8 @@ export default function Bid() {
       setDisplayText('Setting up ZkApp...');
       await setupZkApp();
     }
+
+
     setDisplayText('Creating transaction...');
     setState({ ...state, creatingTransaction: true });
     console.log(`Placing bid of $${bidAmount} on auction ${id}`);
@@ -81,6 +84,14 @@ export default function Bid() {
 
       const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
       console.log("currentMerkleMapRoot" + currentMerkleMapRoot)
+
+      const mina = (window as any).mina;
+       if (mina == null) {
+        setState({ ...state, hasWallet: false });
+        return;
+       }
+      const publicKeyBase58 = await mina.requestAccounts();
+      const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
 
 
       const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount);
@@ -93,12 +104,9 @@ export default function Bid() {
         },
       });
   
+      console.log("publickey" + publicKey.toBase58())
       const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
       console.log(`View transaction at ${transactionLink}`);
-      setDisplayText('Getting transaction JSON...');
-      const transactionJSON = await zkappWorkerClient.getTransactionJSON() as string;
-      setTransactionJSON(transactionJSON);
-      setDisplayText('Transaction created! Send this transaction JSON to the backend.');
       setState({ ...state, creatingTransaction: false });
 
       const response = await fetch(`${backendUrl}/auction-log/add`, {
@@ -109,7 +117,7 @@ export default function Bid() {
         body: JSON.stringify({
           itemId: id,
           key: bidKey,
-          bidUser: state.publicKey?.toBase58(),
+          bidUser: publicKey.toBase58(),
           bidAmount: bidAmount,
           transactionHash: hash,
         }),
@@ -133,7 +141,7 @@ export default function Bid() {
       
     }
 
-  }, [state, bidAmount, id]);
+  }, [state, bidAmount, id, ]);
 
   
   const setupZkApp = async () => {
@@ -147,6 +155,7 @@ export default function Bid() {
     }
     const publicKeyBase58 = await mina.requestAccounts();
     const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
+
     const res = await zkappWorkerClient.fetchAccount({ publicKey: publicKey });
     const accountExists = res.error == null;
     await zkappWorkerClient.loadContract();
@@ -156,12 +165,12 @@ export default function Bid() {
     await zkappWorkerClient.initZkappInstance(zkappPublicKey);
     await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
     const currentNum = await zkappWorkerClient.getMerkleMapRoot();
-    setState({
+    await setState({
       ...state,
       zkappWorkerClient,
       hasWallet: true,
       hasBeenSetup: true,
-      publicKey,
+      publicKey : publicKey,
       zkappPublicKey,
       accountExists,
       currentNum,
@@ -173,20 +182,7 @@ export default function Bid() {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>{auction.title} - AuctionHub</title>
-        <meta name="description" content={`Bid on ${auction.title}`} />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <header className={styles.header}>
-        <h1>AuctionHub</h1>
-        <nav>
-          <Link href="/">Home</Link>
-          <Link href="/auctions">Live Auctions</Link>
-          <Link href="/create">Create Auction</Link>
-        </nav>
-      </header>
+      <Header/>
 
       <main className={styles.main}>
         <h2 className={styles.title}>{auction.title}</h2>

@@ -10,6 +10,10 @@ map.set(Field(5678), Field(1500))
 map.set(Field(9101), Field(2000))  
 map.set(Field(12345), Field(11234))  
 map.set(Field(123456), Field(1123456)) // current 
+map.set(Field(12), Field(12345)) // current 
+map.set(Field(123), Field(15123)) // current 
+map.set(Field(13), Field(12531)) // current 
+
 
 
 class Bid extends Struct({
@@ -31,11 +35,11 @@ export const BiddingProgram = ZkProgram({
         const { key, value, witness } = bid;
 
         // Verify the old root
-        const [computedRoot, computedKey] = witness.computeRootAndKey(Field(0));
+        const [computedRoot, computedKey] = witness.computeRootAndKeyV2(Field(0));
         computedRoot.assertEquals(oldRoot);
 
         // Compute the new root
-        const [newRoot] = witness.computeRootAndKey(value);
+        const [newRoot] = witness.computeRootAndKeyV2(value);
 
         // Optionally, you can add more constraints here
         // For example, ensure the bid value is positive
@@ -180,9 +184,7 @@ const functions = {
   },
 
 
-  getTransactionJSON: async (args: {}) => {
-    return states.transaction!.toJSON();
-  },
+
 };
 
 // ---------------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ export class AuctionLog {
   bidAmount: number;
 
   @Column({ length: 100 })
-  transactionhash: string;
+  transactionHash: string;
 
   @CreateDateColumn()
   bidTime: Date;

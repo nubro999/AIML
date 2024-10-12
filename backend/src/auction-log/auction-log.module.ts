@@ -5,7 +5,6 @@ import { AuctionLogController } from './auction-log.controller';
 import { ItemRepository } from '../item/item.repository';
 
 @Module({
-
     providers:[AuctionLogRepository, AuctionLogService, ItemRepository],
     controllers: [AuctionLogController]
 })

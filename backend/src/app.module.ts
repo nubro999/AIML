@@ -10,6 +10,9 @@ import { AuctionLogsModule } from './auction-log/auction-log.module';
 import { AuctionLog } from './auction-log/auction-log.entity';
 import { Item } from './item/item.entity';
 import { MerkleMapModule } from './merkle-map/merkle-map.module';
+import { AuctionWinnerModule } from './auction-winner/auction-winner.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AuctionWinner } from './auction-winner/auction-winner.entity';
 
 // B62qo23u5UYxJTw4Tni1pLLEHzTQEhh5fNSghHtkQowzNmQHrkJPSBk
 @Module({
@@ -20,9 +23,9 @@ import { MerkleMapModule } from './merkle-map/merkle-map.module';
     username: 'root',
     password: 'root',
     database: 'silentauction',
-    entities: [Item, AuctionLog],
+    entities: [Item, AuctionLog, AuctionWinner],
     synchronize: true,
-  }), ItemsModule, AuctionLogsModule, MerkleMapModule, ],
+  }), ScheduleModule.forRoot(), ItemsModule, AuctionLogsModule, MerkleMapModule, AuctionWinnerModule, ],
   controllers: [AppController],
   providers: [AppService],
 })

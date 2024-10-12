@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm';
 import { AuctionLog } from '../auction-log/auction-log.entity';
 import { MerkleMap } from 'o1js';
+import { AuctionWinner } from '../auction-winner/auction-winner.entity';
 
 @Entity('item')
 export class Item {
@@ -33,5 +34,9 @@ export class Item {
 
   @OneToMany(() => AuctionLog, auctionLog => auctionLog.item)
   auctionLogs: AuctionLog[];
+
+  @OneToOne(() => AuctionWinner, auctionWinner => auctionWinner.auctionItem)
+  auctionWinner: AuctionWinner;
+
 
 }

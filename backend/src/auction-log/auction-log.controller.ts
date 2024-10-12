@@ -18,12 +18,11 @@ constructor(
     return "Hello from  AuctionLogController!";
   }
 
-  @Get() 
 
-
-
-  @Post('/add')
+  @Post('add')
   async addAuctionLog(@Body() auctionLogDto: AuctionLogDto): Promise<string> {
+
+    console.log("addAuctionLog")
     try {
       const item = await this.itemRepository.findById(auctionLogDto.itemId);
       
@@ -36,7 +35,7 @@ constructor(
       auctionLog.key = auctionLogDto.key;
       auctionLog.bidUser = auctionLogDto.bidUser;
       auctionLog.bidAmount = auctionLogDto.bidAmount;
-      auctionLog.transactionhash = auctionLogDto.transactionHash;
+      auctionLog.transactionHash = auctionLogDto.transactionHash;
 
       await this.auctionLogRepository.save(auctionLog);
 
