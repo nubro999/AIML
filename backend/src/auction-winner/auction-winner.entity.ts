@@ -13,6 +13,9 @@ export class AuctionWinner {
   @Column()
   winTime: Date;
 
+  @Column()
+  winnerAddress: string;
+
   @OneToOne(() => Item, item => item.auctionWinner)
   @JoinColumn()
   auctionItem: Item;

@@ -1,11 +1,6 @@
 import { Field, SmartContract, state, State, method, CircuitString, UInt64, PublicKey,  MerkleMapWitness, Struct, Proof, SelfProof, ZkProgram, Experimental, Unconstrained, MerkleMap } from 'o1js';
 
 
-
-
-
-
-
 class Bid extends Struct({
   key: Field,
   value: Field,

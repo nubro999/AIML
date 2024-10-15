@@ -66,6 +66,7 @@ export class AuctionWinnerService {
     const winner = new AuctionWinner();
     winner.auctionItem = auction;
     winner.winningBid = highestBid.bidAmount;
+    winner.winnerAddress = highestBid.bidUser;
     winner.winTime = new Date();
 
     await this.auctionWinnerRepository.save(winner);
@@ -77,4 +78,6 @@ export class AuctionWinnerService {
     this.logger.log('Running auction winner calculation');
     await this.calculateAndStoreWinners();
   }
+
+  
 }
