@@ -47,7 +47,11 @@ constructor(
   }
 
 
+  @Post('merklemap') 
+  async getMerkleMap(){
+    
 
+  }
 
 
 }
