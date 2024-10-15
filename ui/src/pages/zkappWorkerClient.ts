@@ -44,9 +44,8 @@ export default class ZkappWorkerClient {
     return Field.fromJSON(JSON.parse(result as string));
   }
 
-  createUpdateRootTransaction(key: number | null, value: number | null, fetchedmerklemap: MerkleMap | null) {
+  createUpdateRootTransaction(key: number | null, value: number | null, fetchedmerklemap: string | null) {
 
-    
 
     return this._call('createUpdateRootTransaction', { key, value, fetchedmerklemap});
   }

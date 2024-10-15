@@ -68,7 +68,7 @@ export default function Bid() {
 
 
   const handleBid = useCallback(async (e: React.FormEvent) => {
-    state.hasBeenSetup = true;
+    // state.hasBeenSetup = true;
     e.preventDefault();
     if (!state.hasBeenSetup) {
       setDisplayText('Setting up ZkApp...');
@@ -76,10 +76,11 @@ export default function Bid() {
     }
 
     setDisplayText('Fetching MerkleMap...');
-    const fetchedMerkleMap = await fetchMerkleMapAndDeserialize(Number(id));
-    console.log('Fetched MerkleMapRoot:', fetchedMerkleMap.getRoot());
-    const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
+    const fetchedMerkleMap = await fetchMerkleMapString(Number(id));
+    console.log('Fetched MerkleMapRoot:', fetchedMerkleMap);
 
+    const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
+    console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
 
     setDisplayText('Creating transaction...');
     setState({ ...state, creatingTransaction: true });
@@ -87,8 +88,6 @@ export default function Bid() {
     
     try {
       console.log("GetCurrent MerkleRoot")
-
-
 
       const mina = (window as any).mina;
        if (mina == null) {
@@ -100,9 +99,6 @@ export default function Bid() {
 
 
       const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
-
-      const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
-      console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
 
       const { hash } = await (window as any).mina.sendTransaction({
         transaction: transactionJSON1,
@@ -151,41 +147,8 @@ export default function Bid() {
 
   }, [state, bidAmount, id, ]);
 
-  function treeFromJSON(json: any): MerkleTree {
-    const tree = new MerkleTree(json.height);
-    function setNode(level: number, index: bigint, value: Field) {
-      (tree.nodes[level] ??= {})[index.toString()] = value;
-    }
-    for (const level in json.nodes) {
-      const node = json.nodes[level].split(".");
-      for (let i = 0; i < node.length; i += 2) {
-        setNode(
-          parseInt(level),
-          bigintFromBase64(node[i]),
-          fieldFromBase64(node[i + 1])
-        );
-      }
-    }
-    return tree;
-  }
-  
-  function deserializeMerkleMap(tree: string, root: string): MerkleMap {
-  
-    const newMap = new MerkleMap();
-    newMap.tree = treeFromJSON(tree);
-  
-    // Verify the root matches after deserialization
-    if (newMap.getRoot().toString() !== fieldFromBase64(root).toString()) {
-      throw new Error('Root mismatch after deserialization');
-    }
-  
-    return newMap;
-  }
-  
-  
 
-
-  async function fetchMerkleMapAndDeserialize(itemId: number ) {
+  async function fetchMerkleMapString(itemId: number ) {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   
     console.log(itemId)
@@ -202,13 +165,11 @@ export default function Bid() {
         throw new Error('Failed to fetch MerkleMap');
       }
   
-      console.log("hi")
-      const data = await response.json();
-      console.log('tree:', data.tree);
+      const data = await response.text();
   
-      const merkleMap = deserializeMerkleMap(data.tree, data.root)
-      console.log('MerkleMap fetched and set successfully' + merkleMap.getRoot());
-      return merkleMap;
+      // const merkleMap = deserializeMerkleMap(data.tree, data.root)
+      // console.log('MerkleMap fetched and set successfully' + merkleMap.getRoot());
+      return data;
     } catch (error) {
       console.error('Failed to fetch MerkleMap:', error);
       throw error;

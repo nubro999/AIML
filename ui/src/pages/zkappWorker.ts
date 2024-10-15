@@ -136,16 +136,44 @@ const functions = {
   createUpdateRootTransaction : async (args: { 
     key:  number, 
     value: number, 
-    fetchedmerklemap: MerkleMap
+    fetchedmerklemap: string
   }) => {
-    try {
+    try { 
 
+
+      function treeFromJSON(json: any): MerkleTree {
+        const tree = new MerkleTree(json.height);
+        function setNode(level: number, index: bigint, value: Field) {
+          (tree.nodes[level] ??= {})[index.toString()] = value;
+        }
+        for (const level in json.nodes) {
+          const node = json.nodes[level].split(".");
+          for (let i = 0; i < node.length; i += 2) {
+            setNode(
+              parseInt(level),
+              bigintFromBase64(node[i]),
+              fieldFromBase64(node[i + 1])
+            );
+          }
+        }
+        return tree;
+      }
+
+      const { tree, root } = JSON.parse(args.fetchedmerklemap);
+      const newMap = new MerkleMap();
+      newMap.tree = treeFromJSON(tree);
+    
+      // Verify the root matches after deserialization
+      if (newMap.getRoot().toString() !== fieldFromBase64(root).toString()) {
+        throw new Error('Root mismatch after deserialization');
+      }
+    
       // Convert the current root to a Field
-      let fetchedRoot = args.fetchedmerklemap.getRoot()
+      let fetchedRoot = newMap.getRoot()
 
       console.log('fetched root:', fetchedRoot.toString());
       
-      const witness = args.fetchedmerklemap.getWitness( Field.from(args.key));
+      const witness = newMap.getWitness( Field.from(args.key));
 
       console.log('Creating proof of update...');
 
