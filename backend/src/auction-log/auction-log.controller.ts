@@ -3,12 +3,14 @@ import { AuctionLogRepository } from './auction-log.repostiory';
 import { ItemRepository } from '../item/item.repository';
 import { AuctionLogDto } from './dto/auction-log.dto';
 import { AuctionLog } from './auction-log.entity';
+import { AuctionLogService } from './auction-log.service';
 
 @Controller('auction-log')
 export class AuctionLogController {
 
 constructor(
     private readonly auctionLogRepository: AuctionLogRepository,
+    private readonly auctionLogService: AuctionLogService,
     private readonly itemRepository: ItemRepository
     ) {}
     
@@ -46,13 +48,15 @@ constructor(
     }
   }
 
-
-  @Post('merklemap') 
-  async getMerkleMap(){
+  @Post('merklemap')
+  async getMerkleMap(@Body('itemId') itemId: number) {
+      const merkleMap = await this.auctionLogService.getMerkleMapForItem(itemId);
+      const serializedMap = await this.auctionLogService.serializeMerkleMap(merkleMap);
     
+      console.log(serializedMap.length)
 
+      return serializedMap;
   }
-
 
 }
 

@@ -1,9 +1,9 @@
-import { Field, PublicKey, fetchAccount } from 'o1js';
+import { Field, MerkleMap, PublicKey, fetchAccount } from 'o1js';
 
-import type {
-  WorkerFunctions,
-  ZkappWorkerReponse,
-  ZkappWorkerRequest,
+import {
+  type WorkerFunctions,
+  type ZkappWorkerReponse,
+  type ZkappWorkerRequest,
 } from './zkappWorker';
 
 export default class ZkappWorkerClient {
@@ -38,13 +38,17 @@ export default class ZkappWorkerClient {
     });
   }
 
+
   async getMerkleMapRoot(): Promise<Field> {
     const result = await this._call('getMerkleMapRoot', {});
     return Field.fromJSON(JSON.parse(result as string));
   }
 
-  createUpdateRootTransaction(key: number | null, value: number | null) {
-    return this._call('createUpdateRootTransaction', { key, value });
+  createUpdateRootTransaction(key: number | null, value: number | null, fetchedmerklemap: MerkleMap | null) {
+
+    
+
+    return this._call('createUpdateRootTransaction', { key, value, fetchedmerklemap});
   }
 
 

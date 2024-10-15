@@ -18,7 +18,7 @@ export class AuctionLog {
   @Column()
   bidUser: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   bidAmount: number;
 
   @Column({ length: 100 })

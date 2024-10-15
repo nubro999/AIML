@@ -16,6 +16,14 @@
       "feepayerKeyPath": "C:\\Users\\82106/.cache/zkapp-cli/keys/biddingcontract.json",
       "feepayerAlias": "biddingcontract",
       "fee": "0.1"
+    },
+    "auctioncontract": {
+      "networkId": "testnet",
+      "url": "https://api.minascan.io/node/devnet/v1/graphql",
+      "keyPath": "keys/auctioncontract.json",
+      "feepayerKeyPath": "C:\\Users\\82106/.cache/zkapp-cli/keys/auction.json",
+      "feepayerAlias": "auction",
+      "fee": "0.1"
     }
   }
 }

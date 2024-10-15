@@ -26,10 +26,10 @@ export class ItemService {
 
   private async initializeConfig() {
     const configJson = JSON.parse(await fs.readFile('config.json', 'utf8'));
-    this.config = configJson.deployAliases['biddingcontract'];
+    this.config = configJson.deployAliases['auctioncontract'];
     
     const feepayerKeysBase58 = JSON.parse(await fs.readFile(this.config.feepayerKeyPath, 'utf8'));
-    const zkAppKeysBase58 = JSON.parse(await fs.readFile("keys/biddingcontract.json", 'utf8'));
+    const zkAppKeysBase58 = JSON.parse(await fs.readFile("keys/auctioncontract.json", 'utf8'));
 
     this.feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
     this.zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);

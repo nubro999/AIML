@@ -5,11 +5,12 @@ import Link from 'next/link';
 import styles from '../../styles/Home.module.css';
 import bidStyles from '../../styles/Bid.module.css';
 import ZkappWorkerClient from '../zkappWorkerClient';
-import { Field, PublicKey } from 'o1js';
+import { Field, MerkleMap, MerkleTree, PublicKey } from 'o1js';
 import Header from '@/components/Header';
+import { bigintFromBase64, fieldFromBase64 } from 'zkcloudworker';
 
 
-const ZKAPP_ADDRESS = 'B62qpm9RdksBbjAWFxgzbJNhuh82KF56SfHtUc8CC56MK2MLcmUqXg7';
+const ZKAPP_ADDRESS = 'B62qjYDFfZWN7xXH7EP3jUX4JMqFQ3ntynFLwUKUTCKE6hXxC2xSDfR';
 
 interface Auction {
   id: number;
@@ -67,12 +68,17 @@ export default function Bid() {
 
 
   const handleBid = useCallback(async (e: React.FormEvent) => {
-
+    state.hasBeenSetup = true;
     e.preventDefault();
     if (!state.hasBeenSetup) {
       setDisplayText('Setting up ZkApp...');
       await setupZkApp();
     }
+
+    setDisplayText('Fetching MerkleMap...');
+    const fetchedMerkleMap = await fetchMerkleMapAndDeserialize(Number(id));
+    console.log('Fetched MerkleMapRoot:', fetchedMerkleMap.getRoot());
+    const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
 
 
     setDisplayText('Creating transaction...');
@@ -82,8 +88,7 @@ export default function Bid() {
     try {
       console.log("GetCurrent MerkleRoot")
 
-      const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
-      console.log("currentMerkleMapRoot" + currentMerkleMapRoot)
+
 
       const mina = (window as any).mina;
        if (mina == null) {
@@ -94,7 +99,10 @@ export default function Bid() {
       const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
 
 
-      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount);
+      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
+
+      const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
+      console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
 
       const { hash } = await (window as any).mina.sendTransaction({
         transaction: transactionJSON1,
@@ -143,6 +151,69 @@ export default function Bid() {
 
   }, [state, bidAmount, id, ]);
 
+  function treeFromJSON(json: any): MerkleTree {
+    const tree = new MerkleTree(json.height);
+    function setNode(level: number, index: bigint, value: Field) {
+      (tree.nodes[level] ??= {})[index.toString()] = value;
+    }
+    for (const level in json.nodes) {
+      const node = json.nodes[level].split(".");
+      for (let i = 0; i < node.length; i += 2) {
+        setNode(
+          parseInt(level),
+          bigintFromBase64(node[i]),
+          fieldFromBase64(node[i + 1])
+        );
+      }
+    }
+    return tree;
+  }
+  
+  function deserializeMerkleMap(tree: string, root: string): MerkleMap {
+  
+    const newMap = new MerkleMap();
+    newMap.tree = treeFromJSON(tree);
+  
+    // Verify the root matches after deserialization
+    if (newMap.getRoot().toString() !== fieldFromBase64(root).toString()) {
+      throw new Error('Root mismatch after deserialization');
+    }
+  
+    return newMap;
+  }
+  
+  
+
+
+  async function fetchMerkleMapAndDeserialize(itemId: number ) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  
+    console.log(itemId)
+    try {
+      const response = await fetch(`${backendUrl}/auction-log/merklemap`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ itemId: itemId }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch MerkleMap');
+      }
+  
+      console.log("hi")
+      const data = await response.json();
+      console.log('tree:', data.tree);
+  
+      const merkleMap = deserializeMerkleMap(data.tree, data.root)
+      console.log('MerkleMap fetched and set successfully' + merkleMap.getRoot());
+      return merkleMap;
+    } catch (error) {
+      console.error('Failed to fetch MerkleMap:', error);
+      throw error;
+    }
+  }
   
   const setupZkApp = async () => {
 

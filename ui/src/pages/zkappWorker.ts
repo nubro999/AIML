@@ -1,20 +1,14 @@
-import { Field, JsonProof, MerkleMap, MerkleMapWitness, Mina, PublicKey, SmartContract, State, Struct, ZkProgram, fetchAccount, method, state } from 'o1js';
-
+import { Field, JsonProof, MerkleMap,MerkleTree , MerkleMapWitness, Mina, PublicKey, SmartContract, State, Struct, ZkProgram, fetchAccount, method, state } from 'o1js';
+import { fetchMerkleMap } from 'o1js/dist/node/lib/mina/actions/offchain-state-serialization';
+import {
+  fieldToBase64,
+  fieldFromBase64,
+  bigintFromBase64,
+  bigintToBase64,
+} from "zkcloudworker";
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
-
-const map = new MerkleMap();
-map.set(Field(1234), Field(1000))
-map.set(Field(5678), Field(1500))  
-map.set(Field(9101), Field(2000))  
-map.set(Field(12345), Field(11234))  
-map.set(Field(123456), Field(1123456)) // current 
-map.set(Field(12), Field(12345)) // current 
-map.set(Field(123), Field(15123)) // current 
-map.set(Field(13), Field(12531)) // current 
-
-
 
 class Bid extends Struct({
   key: Field,
@@ -54,8 +48,7 @@ export const BiddingProgram = ZkProgram({
 export let biddingProof_ = ZkProgram.Proof(BiddingProgram);
 export class BiddingProof extends biddingProof_ {}
 
-let merkleMap = new MerkleMap();
-
+const merkleMap = new MerkleMap()
 export class BiddingContract extends SmartContract {
   @state(Field) merkleMapRoot = State<Field>();
   @state(Field) endTime = State<Field>();
@@ -85,13 +78,20 @@ const states = {
   BiddingProgram: BiddingProgram,
   zkapp: null as null | BiddingContract,
   transaction: null as null | Transaction,
+  merkleMap: null as null | MerkleMap,
 };
+
+
+
+
 
 
 
 // ---------------------------------------------------------------------------------------
 
 const functions = {
+
+
   setActiveInstanceToDevnet: async (args: {}) => {
     const Network = Mina.Network(
       'https://api.minascan.io/node/devnet/v1/graphql'
@@ -131,33 +131,32 @@ const functions = {
 
     return JSON.stringify(currentNum.toJSON());
   },
-  
+
+
   createUpdateRootTransaction : async (args: { 
     key:  number, 
     value: number, 
+    fetchedmerklemap: MerkleMap
   }) => {
     try {
-      
-      console.log("args key" + args.key)
-      console.log("args value" + args.value)
 
       // Convert the current root to a Field
-      let currentRoot = map.getRoot();
+      let fetchedRoot = args.fetchedmerklemap.getRoot()
 
-      console.log('Initial root:', currentRoot.toString());
+      console.log('fetched root:', fetchedRoot.toString());
       
-      const witness = map.getWitness( Field.from(args.key));
+      const witness = args.fetchedmerklemap.getWitness( Field.from(args.key));
 
       console.log('Creating proof of update...');
 
-      const proof = await BiddingProgram.placeBid(currentRoot, {
+      const proof = await BiddingProgram.placeBid(fetchedRoot, {
         key: Field.from(args.key),
         value: Field.from(args.value),
         witness: witness,
        });
 
         // Update the map and root
-      currentRoot = proof.publicOutput;
+      fetchedRoot = proof.publicOutput;
 
   
       console.log('Creating transaction...');
