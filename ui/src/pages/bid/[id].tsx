@@ -19,11 +19,13 @@ interface Auction {
 
 export default function Bid() {
   const router = useRouter();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const { id } = router.query;
   const [auction, setAuction] = useState<Auction | null>(null);
-  const [bidAmount, setBidAmount] = useState('');
-  const [bidKey, setBidKey] = useState('');
-    const [displayText, setDisplayText] = useState('');
+  const [bidAmount, setBidAmount] = useState<number | null>(null);
+  const [bidKey, setBidKey] = useState<number | null>(null);
+  const [displayText, setDisplayText] = useState('');
   const [transactionJSON, setTransactionJSON] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +48,10 @@ export default function Bid() {
   }, [id]);
 
   const fetchAuctionDetails = async () => {
+
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/items/${id}`);
+      const response = await fetch(`${backendUrl}/items/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch auction details');
       }
@@ -60,7 +63,10 @@ export default function Bid() {
       setLoading(false);
     }
   };
+
+
   const handleBid = useCallback(async (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!state.hasBeenSetup) {
       setDisplayText('Setting up ZkApp...');
@@ -77,7 +83,7 @@ export default function Bid() {
       console.log("currentMerkleMapRoot" + currentMerkleMapRoot)
 
 
-      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction();
+      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount);
 
       const { hash } = await (window as any).mina.sendTransaction({
         transaction: transactionJSON1,
@@ -89,18 +95,41 @@ export default function Bid() {
   
       const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
       console.log(`View transaction at ${transactionLink}`);
-      setDisplayText('Proving transaction...');
-      await zkappWorkerClient.proveUpdateTransaction();
       setDisplayText('Getting transaction JSON...');
       const transactionJSON = await zkappWorkerClient.getTransactionJSON() as string;
       setTransactionJSON(transactionJSON);
       setDisplayText('Transaction created! Send this transaction JSON to the backend.');
       setState({ ...state, creatingTransaction: false });
+
+      const response = await fetch(`${backendUrl}/auction-log/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          itemId: id,
+          key: bidKey,
+          bidUser: state.publicKey?.toBase58(),
+          bidAmount: bidAmount,
+          transactionHash: hash,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to save auction log');
+      }
+  
+      const result = await response.text();
+      console.log(result);
+      setDisplayText('Bid placed successfully!');
+      setState({ ...state, creatingTransaction: false });
+
+
     } catch (error) {
       console.error(error);
       setDisplayText('Error creating transaction');
       setState({ ...state, creatingTransaction: false });
-
+      
       
     }
 
@@ -154,7 +183,7 @@ export default function Bid() {
         <h1>AuctionHub</h1>
         <nav>
           <Link href="/">Home</Link>
-          <Link href="/auctions">Auctions</Link>
+          <Link href="/auctions">Live Auctions</Link>
           <Link href="/create">Create Auction</Link>
         </nav>
       </header>
@@ -167,21 +196,26 @@ export default function Bid() {
         </div>
         <form onSubmit={handleBid} className={bidStyles.bidForm}>
 
-          <input
+        <input
             type="number"
-            value={bidKey}
-            onChange={(e) => setBidKey(e.target.value)}
+            value={bidKey === null ? '' : bidKey}
+            onChange={(e) => {
+              const value = e.target.value;
+              setBidKey(value === '' ? null : Number(value));
+            }}
             placeholder="Enter your bid key"
             required
           />
-          <input
+
+        <input
             type="number"
-            value={bidAmount}
-            onChange={(e) => setBidAmount(e.target.value)}
+            value={bidAmount === null ? '' : bidAmount}
+            onChange={(e) => {
+              const value = e.target.value;
+              setBidAmount(value === '' ? null : Number(value));
+            }}
             placeholder="Enter bid amount"
             required
-            min={auction.minimumPrice + 0.01}
-            step="0.01"
           />
           <button type="submit">Place Bid</button>
         </form>

@@ -5,7 +5,12 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 // ---------------------------------------------------------------------------------------
 
 const map = new MerkleMap();
-map.set(Field(5678), Field(1500))
+map.set(Field(1234), Field(1000))
+map.set(Field(5678), Field(1500))  
+map.set(Field(9101), Field(2000))  
+map.set(Field(12345), Field(11234))  
+map.set(Field(123456), Field(1123456)) // current 
+
 
 class Bid extends Struct({
   key: Field,
@@ -94,6 +99,7 @@ const functions = {
     states.BiddingContract = BiddingContract;
   },
   compileContract: async (args: {}) => {
+
     console.log('compiling...');
     await BiddingProgram.compile();
   
@@ -123,29 +129,30 @@ const functions = {
   },
   
   createUpdateRootTransaction : async (args: { 
-    key: string | number, 
-    value: string | number, 
-    currentRoot: string 
+    key:  number, 
+    value: number, 
   }) => {
     try {
-  
+      
+      console.log("args key" + args.key)
+      console.log("args value" + args.value)
+
       // Convert the current root to a Field
       let currentRoot = map.getRoot();
 
       console.log('Initial root:', currentRoot.toString());
       
-      const witness = map.getWitness( Field(9101));
+      const witness = map.getWitness( Field.from(args.key));
 
       console.log('Creating proof of update...');
 
       const proof = await BiddingProgram.placeBid(currentRoot, {
-        key: Field(9101),
-        value: Field(2000),
+        key: Field.from(args.key),
+        value: Field.from(args.value),
         witness: witness,
        });
 
         // Update the map and root
-      map.set(Field(5678), Field(1500));
       currentRoot = proof.publicOutput;
 
   
@@ -172,9 +179,7 @@ const functions = {
     }
   },
 
-  proveUpdateRootTransaction: async (args: {}) => {
-    await states.transaction!.prove();
-  },
+
   getTransactionJSON: async (args: {}) => {
     return states.transaction!.toJSON();
   },
