@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm';
 import { AuctionLog } from '../auction-log/auction-log.entity';
-import { MerkleMap } from 'o1js';
 import { AuctionWinner } from '../auction-winner/auction-winner.entity';
 
 @Entity('item')
@@ -23,7 +22,7 @@ export class Item {
   @Column('text')
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column()
   minimumPrice: number;
 
   @Column()
@@ -37,6 +36,9 @@ export class Item {
 
   @OneToOne(() => AuctionWinner, auctionWinner => auctionWinner.auctionItem)
   auctionWinner: AuctionWinner;
+
+
+
 
 
 }

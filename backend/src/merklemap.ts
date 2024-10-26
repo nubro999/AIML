@@ -5,7 +5,7 @@ import {
   bigintFromBase64,
   bigintToBase64,
 } from "zkcloudworker";
-
+ 
 
 
 let merklemap = new MerkleMap();

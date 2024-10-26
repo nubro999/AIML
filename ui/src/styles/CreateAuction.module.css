@@ -1,41 +1,419 @@
-.createAuction {
-  background-color: white;
+/* CreateAuction.module.css */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #FFF0F5; /* Light pink background */
+}
+
+/* Header styles */
+.header {
+  width: 100%;
+  height: 80px; /* Taller header */
+  background-color: #FF69B4;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.logo {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navLink {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+/* Main content styles */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
   margin-bottom: 2rem;
 }
 
-.createAuction h2 {
-  font-size: 2rem;
+.formGroup {
   margin-bottom: 1.5rem;
-  color: var(--secondary-color);
 }
 
-.createAuction form {
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Input styles with visible borders */
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 1rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 1rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FF69B4;
+}
+
+/* Input with MINA unit */
+.inputWithUnit {
+  position: relative;
+}
+
+.inputWithUnit input {
+  padding-right: 4rem;
+}
+
+.unitLabel {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+/* Auction type selection */
+.auctionTypeContainer {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.auctionTypeCard {
+  flex: 1;
+  position: relative;
+}
+
+.auctionTypeInput {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Auction type cards with visible borders */
+.auctionTypeLabel {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+  min-height: 120px;
 }
 
-.createAuction input {
-  margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  border: 1px solid var(--primary-color);
-  border-radius: 4px;
-  font-size: 1rem;
+.auctionTypeInput:checked + .auctionTypeLabel {
+  border-color: #2563EB;
+  background-color: #EBF5FF;
 }
 
-.createAuction button {
-  background-color: var(--secondary-color);
+.auctionTypeIcon {
+  font-size: 24px;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.auctionTypeInput:checked + .auctionTypeLabel .auctionTypeIcon {
+  color: #2563EB;
+}
+
+.auctionTypeName {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Create button */
+.button {
+  width: 100%;
+  height: 48px;
+  background-color: #2563EB;
   color: white;
   border: none;
-  padding: 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 8px;
+  font-weight: 500;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.createAuction button:hover {
-  background-color: var(--accent-color);
+.button:hover {
+  background-color: #1D4ED8;
+}
+
+.button:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+/* Select dropdown styles */
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB; /* Light gray border */
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  background-color: white;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #FF69B4;
+  box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.1);
+}
+
+/* Add borders to auction type cards */
+.auctionTypeLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.auctionTypeInput:checked + .auctionTypeLabel {
+  border-color: #FF69B4;
+  background-color: rgba(255, 105, 180, 0.1);
+}
+
+/* Style the select dropdown */
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+/* Add container shadow and border */
+.formContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #E5E7EB;
+}
+
+/* Style the input with unit */
+.inputWithUnit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWithUnit input {
+  padding-right: 4rem; /* Make space for the MINA text */
+}
+
+.unitLabel {
+  position: absolute;
+  right: 1rem;
+  color: #6B7280;
+  pointer-events: none;
+}
+
+.nftSendContainer {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+.nftInstructions {
+  margin-bottom: 2rem;
+}
+
+.nftInstructions h3 {
+  color: #333;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.nftInstructions p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.nftInstructions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nftInstructions li {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.nftInstructions li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: #666;
+}
+
+.sendButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 48px;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sendButton:hover {
+  background-color: #2563EB;
+}
+
+.sendButton:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.sendIcon {
+  margin-left: 0.5rem;
+}
+
+/* Update the main container styles */
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.title {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Update form container styles */
+.formContainer {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Add styles for loading state */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingIcon {
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+/* Update button styles */
+.button,
+.sendButton {
+  position: relative;
+  overflow: hidden;
+}
+
+.button:disabled,
+.sendButton:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.button:disabled::after,
+.sendButton:disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
