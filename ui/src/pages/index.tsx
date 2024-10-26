@@ -44,7 +44,7 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        <p>&copy; 2024 AuctionHub. All rights reserved.</p>
+        <p>&copy; 2024 Silent Auction. All rights reserved.</p>
       </footer>
     </div>
   );

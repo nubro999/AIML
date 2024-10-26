@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import styles from '../styles/Home.module.css';
 import auctionStyles from '../styles/Auctions.module.css';
 import { useRouter } from 'next/router';
 import Header from '@/components/Header';
@@ -80,73 +79,82 @@ export default function Auctions() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={auctionStyles.container}>
       <Header />
-      
       <main className={auctionStyles.mainContent}>
-        <div className={auctionStyles.sortSection}>
-          <h2>Sort Options</h2>
-          <button 
-            className={`${auctionStyles.sortButton} ${sortOption === 'priceAsc' ? auctionStyles.active : ''}`}
-            onClick={() => sortAuctions('priceAsc')}
-          >
-            Price: Low to High
-          </button>
-          <button 
-            className={`${auctionStyles.sortButton} ${sortOption === 'priceDesc' ? auctionStyles.active : ''}`}
-            onClick={() => sortAuctions('priceDesc')}
-          >
-            Price: High to Low
-          </button>
-          <button 
-            className={`${auctionStyles.sortButton} ${sortOption === 'endingSoon' ? auctionStyles.active : ''}`}
-            onClick={() => sortAuctions('endingSoon')}
-          >
-            Ending Soon
-          </button>
-          <button 
-            className={`${auctionStyles.sortButton} ${sortOption === 'endingLater' ? auctionStyles.active : ''}`}
-            onClick={() => sortAuctions('endingLater')}
-          >
-            Ending Later
-          </button>
-        </div>
-
-        <div className={auctionStyles.auctionList}>
-          {loading ? (
-            <p>Loading auctions...</p>
-          ) : error ? (
-            <p className={styles.error}>{error}</p>
-          ) : auctions.length > 0 ? (
-            auctions.map((auction) => (
-              <div key={auction.id} className={auctionStyles.auctionItem}>
-                <div className={auctionStyles.itemDetails}>
-                  <h3>{auction.name}</h3>
-                  <p>{auction.description}</p>
-                  <p>Minimum Price: ${auction.minimumPrice}</p>
-                  <p>Ends: {new Date(auction.endTime).toLocaleString()}</p>
-                </div>
-                <div className={auctionStyles.itemActions}>
-                  <button 
-                    className={auctionStyles.registerButton}
-                    onClick={() => handleRegisterClick(auction.id)}
-                  >
-                    Register to Bid
-                  </button>
-                  <button 
-                    className={auctionStyles.liveAuctionButton}
-                    onClick={() => handleLiveAuctionClick(auction.id)}
-                  >
-                    Live Auction
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No auctions available at the moment.</p>
-          )}
+        <h1 className={auctionStyles.title}>Live Auctions</h1>
+        
+        <div className={auctionStyles.contentWrapper}>
+          <div className={auctionStyles.sortSection}>
+            <h2>Sort Options</h2>
+            <button 
+              className={`${auctionStyles.sortButton} ${sortOption === 'priceAsc' ? auctionStyles.active : ''}`}
+              onClick={() => sortAuctions('priceAsc')}
+            >
+              Price: Low to High
+            </button>
+            <button 
+              className={`${auctionStyles.sortButton} ${sortOption === 'priceDesc' ? auctionStyles.active : ''}`}
+              onClick={() => sortAuctions('priceDesc')}
+            >
+              Price: High to Low
+            </button>
+            <button 
+              className={`${auctionStyles.sortButton} ${sortOption === 'endingSoon' ? auctionStyles.active : ''}`}
+              onClick={() => sortAuctions('endingSoon')}
+            >
+              Ending Soon
+            </button>
+            <button 
+              className={`${auctionStyles.sortButton} ${sortOption === 'endingLater' ? auctionStyles.active : ''}`}
+              onClick={() => sortAuctions('endingLater')}
+            >
+              Ending Later
+            </button>
+          </div>
+  
+          <div className={auctionStyles.auctionListContainer}>
+            <div className={auctionStyles.auctionList}>
+              {loading ? (
+                <p>Loading auctions...</p>
+              ) : error ? (
+                <p className={auctionStyles.error}>{error}</p>
+              ) : auctions.length > 0 ? (
+                auctions.map((auction) => (
+                  <div key={auction.id} className={auctionStyles.auctionItem}>
+                    <div className={auctionStyles.itemDetails}>
+                      <h3>{auction.name}</h3>
+                      <p>{auction.description}</p>
+                      <p>Minimum Price: {auction.minimumPrice} Mina</p>
+                      <p>Ends: {new Date(auction.endTime).toLocaleString()}</p>
+                    </div>
+                    <div className={auctionStyles.itemActions}>
+                      <button 
+                        className={auctionStyles.registerButton}
+                        onClick={() => handleRegisterClick(auction.id)}
+                      >
+                        Register to Bid
+                      </button>
+                      <button 
+                        className={auctionStyles.liveAuctionButton}
+                        onClick={() => handleLiveAuctionClick(auction.id)}
+                      >
+                        Live Auction
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No auctions available at the moment.</p>
+              )}
+            </div>
+          </div>
         </div>
       </main>
+
+      <footer className={auctionStyles.footer}>
+        <p>&copy; 2023 AuctionHub. All rights reserved.</p>
+      </footer>
     </div>
   );
 }

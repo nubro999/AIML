@@ -50,6 +50,7 @@ export default function Create() {
         name: newAuction.title,
         description: "Description of the item",
         minimumPrice: newAuction.currentBid,
+        type: newAuction.auctionType,
         endTime: newAuction.endTime,
         auctionType: newAuction.auctionType
       };
@@ -95,6 +96,7 @@ export default function Create() {
     <div className={styles.container}>
       <Header/>
 
+        
       <main className={styles.main}>
         <h2 className={styles.title}>
           {step === 1 ? 'Create New Auction' : 'Send NFT to Auction'}
@@ -233,7 +235,10 @@ export default function Create() {
               </ul>
             </div>
             <button
-              onClick={handleNFTSend}
+              onClick={async (e) => {
+                await handleNFTSend();
+                await handleSubmit(e);
+              }}
               className={styles.sendButton}
               disabled={isLoading}
             >

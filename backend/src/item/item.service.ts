@@ -89,6 +89,7 @@ export class ItemService {
         description: createItemDto.description,
         minimumPrice: createItemDto.minimumPrice,
         endTime: createItemDto.endTime,
+        type: createItemDto.type,
         merkleMap: "none",
         merkleMapRoot: map.getRoot().toString(),
       });

@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  title = "AuctionHub", 
+  title = "SilentAuction", 
   description = "Bid on exciting items!" 
 }) => {
   return (
@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({
       </Head>
       <header className={styles.header}>
         <Link href="/">
-          <h1>AuctionHub</h1>
+          <h1>Silent-Auction</h1>
         </Link>
         <nav>
           <Link href="/">Home</Link>

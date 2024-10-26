@@ -16,11 +16,14 @@ export class Item {
   @Column()
   merkleMapRoot: string;
 
-  @Column()
+  @Column({ nullable: true })
   zkappAddress: string;
 
   @Column('text')
   description: string;
+
+  @Column()
+  type: string;
 
   @Column()
   minimumPrice: number;

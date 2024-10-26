@@ -1,13 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
-import Link from 'next/link';
-import styles from '../../styles/Home.module.css';
 import bidStyles from '../../styles/Bid.module.css';
 import ZkappWorkerClient from '../zkappWorkerClient';
 import { Field, MerkleMap, MerkleTree, PublicKey } from 'o1js';
 import Header from '@/components/Header';
-import { bigintFromBase64, fieldFromBase64 } from 'zkcloudworker';
 
 
 const ZKAPP_ADDRESS = 'B62qjYDFfZWN7xXH7EP3jUX4JMqFQ3ntynFLwUKUTCKE6hXxC2xSDfR';
@@ -213,46 +209,84 @@ export default function Bid() {
   if (!auction) return <div>Loading...</div>;
 
   return (
-    <div className={styles.container}>
-      <Header/>
+    <div className={bidStyles.container}>
+      <header className={bidStyles.header}>
+        <Header />
+      </header>
 
-      <main className={styles.main}>
-        <h2 className={styles.title}>{auction.title}</h2>
-        <div className={bidStyles.auctionDetails}>
-          <p>Minimum Price: {auction.minimumPrice} Mina</p>
-          <p>Ends at: {new Date(auction.endTime).toLocaleString()}</p>
-        </div>
-        <form onSubmit={handleBid} className={bidStyles.bidForm}>
+      <main className={bidStyles.main}>
+        <h1 className={bidStyles.title}>Create Bid</h1>
 
-        <input
-            type="number"
-            value={bidKey === null ? '' : bidKey}
-            onChange={(e) => {
-              const value = e.target.value;
-              setBidKey(value === '' ? null : Number(value));
-            }}
-            placeholder="Enter your bid key"
-            required
-          />
 
-        <input
-            type="number"
-            value={bidAmount === null ? '' : bidAmount}
-            onChange={(e) => {
-              const value = e.target.value;
-              setBidAmount(value === '' ? null : Number(value));
-            }}
-            placeholder="Enter bid amount"
-            required
-          />
-          <button type="submit">Place Bid</button>
-        </form>
+        {loading ? (
+          <div className={`${bidStyles.statusMessage} ${bidStyles.loading}`}>
+            Loading auction details...
+          </div>
+        ) : error ? (
+          <div className={`${bidStyles.statusMessage} ${bidStyles.error}`}>
+            {error}
+          </div>
+        ) : (
+          <>
+            <h2 className={bidStyles.title}>{auction?.title}</h2>
+            <div className={bidStyles.auctionDetails}>
+              <p>
+                <span>Minimum Price:</span>
+                <span>{auction?.minimumPrice} MINA</span>
+              </p>
+              <p>
+                <span>Ends at:</span>
+                <span>{new Date(auction?.endTime || '').toLocaleString()}</span>
+              </p>
+            </div>
 
+            <form onSubmit={handleBid} className={bidStyles.bidForm}>
+              <input
+                type="number"
+                value={bidKey === null ? '' : bidKey}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setBidKey(value === '' ? null : Number(value));
+                }}
+                placeholder="Enter your bid key"
+                required
+              />
+
+              <input
+                type="number"
+                value={bidAmount === null ? '' : bidAmount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setBidAmount(value === '' ? null : Number(value));
+                }}
+                placeholder="Enter bid amount"
+                required
+              />
+
+              <button 
+                type="submit" 
+                disabled={state.creatingTransaction}
+              >
+                {state.creatingTransaction ? 'Processing...' : 'Place Bid'}
+              </button>
+            </form>
+
+            {displayText && (
+              <div className={`${bidStyles.statusMessage} ${
+                displayText.includes('successfully') ? bidStyles.success : 
+                displayText.includes('Error') ? bidStyles.error : 
+                bidStyles.loading
+              }`}>
+                {displayText}
+              </div>
+            )}
+          </>
+        )}
       </main>
 
-      <footer className={styles.footer}>
+      <footer className={bidStyles.footer}>
         <p>&copy; 2023 AuctionHub. All rights reserved.</p>
       </footer>
     </div>
-  );
+  );  
 }
