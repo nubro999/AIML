@@ -1,14 +1,14 @@
-export {};
-
-function loadCOIServiceWorker() {
+export const loadCOIServiceWorker = (): void => {
   if (
     typeof window !== 'undefined' &&
-    window.location.hostname != 'localhost'
-  ) { 
-    const coi = window.document.createElement('script');
-    coi.setAttribute('src', '/silent-auction/coi-serviceworker.min.js'); // update if your repo name changes for 'npm run deploy' to work correctly
-    window.document.head.appendChild(coi);
+    window.location.hostname !== 'localhost'
+  ) {
+    try {
+      const coi = window.document.createElement('script');
+      coi.setAttribute('src', '/silent-auction/coi-serviceworker.min.js');
+      window.document.head.appendChild(coi);
+    } catch (err) {
+      console.warn('COI ServiceWorker failed to load', err);
+    }
   }
-}
-
-loadCOIServiceWorker();
+};
