@@ -1,6 +1,6 @@
 // pages/_app.tsx
-import React, { useEffect } from 'react';
 import "@/styles/globals.css";
+import React, { useEffect } from 'react';
 import type { AppProps } from "next/app";
 import { 
   isCOIEnabled, 

@@ -7,16 +7,15 @@ const __dirname = path.dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  output: 'export', // Add this for static export
-  // Add basePath if deploying to a subdirectory
-  // basePath: '/your-repo-name',
+  output: 'export',
+  basePath: '/silent-auction', // Add your repo name
+  assetPrefix: '/silent-auction/', // Add your repo name with trailing slash
+  trailingSlash: true, // This helps with GitHub Pages compatibility
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
   },
 
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
 
@@ -26,14 +25,20 @@ const nextConfig = {
         ...config.resolve.alias,
         o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
       };
+      // Add fallbacks for node modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
     }
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
 
-  // To enable o1js for the web, we must set the COOP and COEP headers.
+  // Headers configuration
   async headers() {
-    // Only include headers when not exporting statically
     if (process.env.NODE_ENV === 'development') {
       return [
         {
