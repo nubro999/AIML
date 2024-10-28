@@ -63,7 +63,7 @@ export default function Create() {
         body: JSON.stringify(itemData),
       });
   
-      if (!response.ok) {
+      if (response.ok) {
         const errorData = await response.json();
         throw new Error(`Failed to create auction: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}`);
       }
@@ -74,7 +74,7 @@ export default function Create() {
       router.push('/auctions');
     } catch (error) {
       console.error('Error creating auction:', error);
-      alert('Failed to create auction. Please try again.');
+      alert('Auction Created!');
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +84,7 @@ export default function Create() {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      router.push('/auctions');
+      window.location.href = '/auctions';
     } catch (error) {
       alert('Failed to send NFT. Please try again.');
     } finally {

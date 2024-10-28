@@ -27,6 +27,15 @@ export default function Bid() {
   const [transactionJSON, setTransactionJSON] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Add these new state variables at the beginning of your component
+  const [bidInfo, setBidInfo] = useState<{
+    key: number | null;
+    amount: number | null;
+    transactionHash: string | null;
+    merkleMapRoot: string | null;
+    timestamp: string | null;
+  } | null>(null);
+
   const [state, setState] = useState({
     zkappWorkerClient: null as null | ZkappWorkerClient,
     hasWallet: null as null | boolean,
@@ -78,6 +87,7 @@ export default function Bid() {
     const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
     console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
 
+
     setDisplayText('Creating transaction...');
     setState({ ...state, creatingTransaction: true });
     console.log(`Placing bid of $${bidAmount} on auction ${id}`);
@@ -108,6 +118,15 @@ export default function Bid() {
       const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
       console.log(`View transaction at ${transactionLink}`);
       setState({ ...state, creatingTransaction: false });
+
+      setBidInfo({
+        key: bidKey,
+        amount: bidAmount,
+        transactionHash: transactionLink,
+        merkleMapRoot: currentMerkleMapRoot.toString(),
+        timestamp: new Date().toISOString()
+      });
+  
 
       const response = await fetch(`${backendUrl}/auction-log/add`, {
         method: 'POST',
@@ -270,6 +289,41 @@ export default function Bid() {
                 {state.creatingTransaction ? 'Processing...' : 'Place Bid'}
               </button>
             </form>
+            
+            {bidInfo && (
+              <div className={bidStyles.bidInfoContainer}>
+                <h3 className={bidStyles.bidInfoTitle}>Bid Information</h3>
+                <div className={bidStyles.bidInfoContent}>
+                  <div className={bidStyles.bidInfoItem}>
+                    <span>Bid Key:</span>
+                    <span>{bidInfo.key}</span>
+                  </div>
+                  <div className={bidStyles.bidInfoItem}>
+                    <span>Bid Amount:</span>
+                    <span>{bidInfo.amount} MINA</span>
+                  </div>
+                  <div className={bidStyles.bidInfoItem}>
+                    <span>Transaction:</span>
+                    <a 
+                      href={`https://minascan.io/devnet/tx/${bidInfo.transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={bidStyles.transactionLink}
+                    >
+                      View Transaction
+                    </a>
+                  </div>
+                  <div className={bidStyles.bidInfoItem}>
+                    <span>Merkle Map Root:</span>
+                    <span className={bidStyles.merkleRoot}>{bidInfo.merkleMapRoot}</span>
+                  </div>
+                  <div className={bidStyles.bidInfoItem}>
+                    <span>Timestamp:</span>
+                    <span>{new Date(bidInfo.timestamp!).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {displayText && (
               <div className={`${bidStyles.statusMessage} ${
@@ -285,7 +339,7 @@ export default function Bid() {
       </main>
 
       <footer className={bidStyles.footer}>
-        <p>&copy; 2023 AuctionHub. All rights reserved.</p>
+        <p>&copy; 2024 Silent-Auction. All rights reserved.</p>
       </footer>
     </div>
   );  
