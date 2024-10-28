@@ -89,7 +89,7 @@ const states = {
 
 // ---------------------------------------------------------------------------------------
 
-const functions = {
+export const functions = {
 
 
   setActiveInstanceToDevnet: async (args: {}) => {

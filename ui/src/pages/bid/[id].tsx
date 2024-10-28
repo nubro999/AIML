@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import bidStyles from '../../styles/Bid.module.css';
-import ZkappWorkerClient from '../zkappWorkerClient';
+import ZkappWorkerClient from '../../utils/zkappWorkerClient';
 import { Field, MerkleMap, MerkleTree, PublicKey } from 'o1js';
 import Header from '@/components/Header';
 
