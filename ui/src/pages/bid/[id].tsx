@@ -15,63 +15,83 @@ interface Auction {
   endTime: string;
 }
 
+interface BidInfo {
+  key: number | null;
+  amount: number | null;
+  transactionHash: string | null;
+  merkleMapRoot: string | null;
+  timestamp: string | null;
+}
+
+interface AppState {
+  zkappWorkerClient: ZkappWorkerClient | null;
+  hasWallet: boolean | null;
+  hasBeenSetup: boolean;
+  accountExists: boolean;
+  currentNum: Field | null;
+  publicKey: PublicKey | null;
+  zkappPublicKey: PublicKey | null;
+  creatingTransaction: boolean;
+}
+
+
 export default function Bid() {
   const router = useRouter();
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const { id } = router.query;
   const [auction, setAuction] = useState<Auction | null>(null);
   const [bidAmount, setBidAmount] = useState<number | null>(null);
   const [bidKey, setBidKey] = useState<number | null>(null);
   const [displayText, setDisplayText] = useState('');
-  const [transactionJSON, setTransactionJSON] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Add these new state variables at the beginning of your component
-  const [bidInfo, setBidInfo] = useState<{
-    key: number | null;
-    amount: number | null;
-    transactionHash: string | null;
-    merkleMapRoot: string | null;
-    timestamp: string | null;
-  } | null>(null);
+  const [bidInfo, setBidInfo] = useState<BidInfo | null>(null);
 
-  const [state, setState] = useState({
-    zkappWorkerClient: null as null | ZkappWorkerClient,
-    hasWallet: null as null | boolean,
+  const [state, setState] = useState<AppState>({
+    zkappWorkerClient: null,
+    hasWallet: null,
     hasBeenSetup: false,
     accountExists: false,
-    currentNum: null as null | Field,
-    publicKey: null as null | PublicKey,
-    zkappPublicKey: null as null | PublicKey,
+    currentNum: null,
+    publicKey: null,
+    zkappPublicKey: null,
     creatingTransaction: false,
   });
 
   useEffect(() => {
+    let mounted = true;
+
     async function init() {
-      if (id) {
-        console.log(id + " id ")
-        await fetchAuctionDetails();
-        
-        try {
-          console.log("initialize worker client")
+      if (!router.isReady) return;
+      
+      const { id } = router.query;
+      if (!id || Array.isArray(id)) return;
+
+      try {
+        if (mounted) {
+          await fetchAuctionDetails(id);
           const zkappWorkerClient = new ZkappWorkerClient();
           setState(prev => ({
             ...prev,
             zkappWorkerClient
           }));
-        } catch (err) {
-          console.error('Failed to initialize ZkappWorkerClient:', err);
+        }
+      } catch (err) {
+        console.error('Failed to initialize:', err);
+        if (mounted) {
           setError('Failed to initialize blockchain connection');
         }
       }
     }
     
     init();
-  }, [id]);
 
-  const fetchAuctionDetails = async () => {
-    console.log("fetchAuctionDetails")
+    return () => {
+      mounted = false;
+    };
+  }, [router.isReady, router.query]);
+
+  const fetchAuctionDetails = async (id: string) => {
     try {
       setLoading(true);
       const response = await fetch(`${backendUrl}/items/${id}`);
@@ -80,114 +100,105 @@ export default function Bid() {
       }
       const data = await response.json();
       setAuction(data);
-      setLoading(false);
     } catch (err) {
       setError('Error fetching auction details. Please try again later.');
+    } finally {
       setLoading(false);
     }
   };
 
-
-  
-  
-
-
   const handleBid = useCallback(async (e: React.FormEvent) => {
-    // state.hasBeenSetup = true;
     e.preventDefault();
+    
     if (!state.zkappWorkerClient) {
       setDisplayText('ZkApp client not initialized. Please try again.');
       return;
     }
 
-    if (!state.hasBeenSetup) {
-      setDisplayText('Setting up ZkApp...');
-      await setupZkApp();
+    if (!router.query.id || Array.isArray(router.query.id)) {
+      setDisplayText('Invalid auction ID');
+      return;
     }
 
-    setDisplayText('Fetching MerkleMap...');
-    const fetchedMerkleMap = await fetchMerkleMapString(Number(id));
-    console.log('Fetched MerkleMapRoot:', fetchedMerkleMap);
-
-    const currentMerkleMapRoot = await state.zkappWorkerClient.getMerkleMapRoot();
-    console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
-
-
-    setDisplayText('Creating transaction...');
-    setState({ ...state, creatingTransaction: true });
-    console.log(`Placing bid of $${bidAmount} on auction ${id}`);
-    
     try {
-      console.log("GetCurrent MerkleRoot")
+      if (!state.hasBeenSetup) {
+        setDisplayText('Setting up ZkApp...');
+        await setupZkApp();
+      }
+
+      setDisplayText('Fetching MerkleMap...');
+      const fetchedMerkleMap = await fetchMerkleMapString(Number(router.query.id));
+      
+      const currentMerkleMapRoot = await state.zkappWorkerClient.getMerkleMapRoot();
+
+      setDisplayText('Creating transaction...');
+      setState(prev => ({ ...prev, creatingTransaction: true }));
 
       const mina = (window as any).mina;
-       if (mina == null) {
-        setState({ ...state, hasWallet: false });
+      if (!mina) {
+        setState(prev => ({ ...prev, hasWallet: false }));
         return;
-       }
+      }
+
       const publicKeyBase58 = await mina.requestAccounts();
       const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
 
+      const transactionJSON = await state.zkappWorkerClient.createUpdateRootTransaction(
+        bidKey!,
+        bidAmount!,
+        fetchedMerkleMap
+      );
 
-      const transactionJSON1 = await state.zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
-
-      const { hash } = await (window as any).mina.sendTransaction({
-        transaction: transactionJSON1,
+      const { hash } = await mina.sendTransaction({
+        transaction: transactionJSON,
         feePayer: {
           fee: 0.1,
           memo: '',
         },
       });
-  
-      console.log("publickey" + publicKey.toBase58())
-      const transactionLink = `https://minascan.io/devnet/tx/${hash}`;
-      console.log(`View transaction at ${transactionLink}`);
-      setState({ ...state, creatingTransaction: false });
 
-      setBidInfo({
-        key: bidKey,
-        amount: bidAmount,
-        transactionHash: transactionLink,
-        merkleMapRoot: currentMerkleMapRoot.toString(),
-        timestamp: new Date().toISOString()
-      });
-  
+      // Update bid info and save to backend
+      await saveBidInfo(publicKey, hash);
 
-      const response = await fetch(`${backendUrl}/auction-log/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          itemId: id,
-          key: bidKey,
-          bidUser: publicKey.toBase58(),
-          bidAmount: bidAmount,
-          transactionHash: hash,
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to save auction log');
-      }
-  
-      const result = await response.text();
-      console.log(result);
       setDisplayText('Bid placed successfully!');
-      setState({ ...state, creatingTransaction: false });
-
-
     } catch (error) {
       console.error(error);
       setDisplayText('Error creating transaction');
-      setState({ ...state, creatingTransaction: false });
-      
-      
+    } finally {
+      setState(prev => ({ ...prev, creatingTransaction: false }));
+    }
+  }, [state, bidAmount, bidKey, router.query.id]);
+
+  const saveBidInfo = async (publicKey: PublicKey, hash: string) => {
+    if (!router.query.id) return;
+
+    const response = await fetch(`${backendUrl}/auction-log/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        itemId: router.query.id,
+        key: bidKey,
+        bidUser: publicKey.toBase58(),
+        bidAmount: bidAmount,
+        transactionHash: hash,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save auction log');
     }
 
-  }, [state, bidAmount, id, ]);
-
-
+    setBidInfo({
+      key: bidKey,
+      amount: bidAmount,
+      transactionHash: hash,
+      merkleMapRoot: (await state.zkappWorkerClient?.getMerkleMapRoot())?.toString() || null,
+      timestamp: new Date().toISOString()
+    });
+  };
+  
   async function fetchMerkleMapString(itemId: number ) {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   
