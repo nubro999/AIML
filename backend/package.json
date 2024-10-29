@@ -1,13 +1,12 @@
 {
-  "name": "pump-z",
+  "name": "silent-auction",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "homepage": "https://mmingyeomm.github.io/silent-auction/",
   "scripts": {
-    "build": "nest build && next export",
+    "build": "nest build",
     "predeploy": "npm run build",
     "deploy": "touch out/.nojekyll && gh-pages -d out --dotfiles",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
