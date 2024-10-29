@@ -30,7 +30,7 @@ export const loadCOIServiceWorker = async (): Promise<void> => {
     // Create and configure script element
     const coi = document.createElement('script');
     
-    // Use the correct path based on your project structure
+      // Use the correct path based on your project structure
     // Assuming the file is in public/coi-serviceworker.min.js
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const coiPath = `${basePath}/coi-serviceworker.min.js`;

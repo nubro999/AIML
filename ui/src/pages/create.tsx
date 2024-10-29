@@ -26,6 +26,7 @@ export default function Create() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("button")
     
     if (step === 1 && auctionType === 'NFT') {
       setStep(2);
