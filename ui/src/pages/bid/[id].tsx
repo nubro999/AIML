@@ -50,9 +50,11 @@ export default function Bid() {
   useEffect(() => {
     async function init() {
       if (id) {
+        console.log(id + " id ")
         await fetchAuctionDetails();
         
         try {
+          console.log("initialize worker client ")
           const zkappWorkerClient = new ZkappWorkerClient();
           setState(prev => ({
             ...prev,
@@ -69,7 +71,7 @@ export default function Bid() {
   }, [id]);
 
   const fetchAuctionDetails = async () => {
-
+    console.log("fetchAuctionDetails")
     try {
       setLoading(true);
       const response = await fetch(`${backendUrl}/items/${id}`);
