@@ -46,12 +46,26 @@ export default function Bid() {
     zkappPublicKey: null as null | PublicKey,
     creatingTransaction: false,
   });
-  const zkappWorkerClient = new ZkappWorkerClient();
 
   useEffect(() => {
-    if (id) {
-      fetchAuctionDetails();
+    async function init() {
+      if (id) {
+        await fetchAuctionDetails();
+        
+        try {
+          const zkappWorkerClient = new ZkappWorkerClient();
+          setState(prev => ({
+            ...prev,
+            zkappWorkerClient
+          }));
+        } catch (err) {
+          console.error('Failed to initialize ZkappWorkerClient:', err);
+          setError('Failed to initialize blockchain connection');
+        }
+      }
     }
+    
+    init();
   }, [id]);
 
   const fetchAuctionDetails = async () => {
@@ -72,9 +86,18 @@ export default function Bid() {
   };
 
 
+  
+  
+
+
   const handleBid = useCallback(async (e: React.FormEvent) => {
     // state.hasBeenSetup = true;
     e.preventDefault();
+    if (!state.zkappWorkerClient) {
+      setDisplayText('ZkApp client not initialized. Please try again.');
+      return;
+    }
+
     if (!state.hasBeenSetup) {
       setDisplayText('Setting up ZkApp...');
       await setupZkApp();
@@ -84,7 +107,7 @@ export default function Bid() {
     const fetchedMerkleMap = await fetchMerkleMapString(Number(id));
     console.log('Fetched MerkleMapRoot:', fetchedMerkleMap);
 
-    const currentMerkleMapRoot = await zkappWorkerClient.getMerkleMapRoot();
+    const currentMerkleMapRoot = await state.zkappWorkerClient.getMerkleMapRoot();
     console.log("current Contract MerkleMapRoot" + currentMerkleMapRoot)
 
 
@@ -104,7 +127,7 @@ export default function Bid() {
       const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
 
 
-      const transactionJSON1 = await zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
+      const transactionJSON1 = await state.zkappWorkerClient.createUpdateRootTransaction(bidKey, bidAmount, fetchedMerkleMap);
 
       const { hash } = await (window as any).mina.sendTransaction({
         transaction: transactionJSON1,
@@ -192,8 +215,12 @@ export default function Bid() {
   }
   
   const setupZkApp = async () => {
+    if (!state.zkappWorkerClient) {
+      setDisplayText('ZkApp client not initialized. Please try again.');
+      return;
+    }
 
-    await zkappWorkerClient.setActiveInstanceToDevnet();
+    await state.zkappWorkerClient.setActiveInstanceToDevnet();
 
     const mina = (window as any).mina;
     if (mina == null) {
@@ -203,18 +230,17 @@ export default function Bid() {
     const publicKeyBase58 = await mina.requestAccounts();
     const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
 
-    const res = await zkappWorkerClient.fetchAccount({ publicKey: publicKey });
+    const res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey });
     const accountExists = res.error == null;
-    await zkappWorkerClient.loadContract();
-    await zkappWorkerClient.compileContract();
+    await state.zkappWorkerClient.loadContract();
+    await state.zkappWorkerClient.compileContract();
 
     const zkappPublicKey = PublicKey.fromBase58(ZKAPP_ADDRESS);
-    await zkappWorkerClient.initZkappInstance(zkappPublicKey);
-    await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
-    const currentNum = await zkappWorkerClient.getMerkleMapRoot();
+    await state.zkappWorkerClient.initZkappInstance(zkappPublicKey);
+    await state.zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
+    const currentNum = await state.zkappWorkerClient.getMerkleMapRoot();
     await setState({
       ...state,
-      zkappWorkerClient,
       hasWallet: true,
       hasBeenSetup: true,
       publicKey : publicKey,
