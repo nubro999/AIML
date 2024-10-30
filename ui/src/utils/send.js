@@ -1,12 +1,12 @@
 import axios from "axios";
 import { chainId } from "./blockchain/explorer";
 const {
-  REACT_APP_DEBUG,
+  NEXT_PUBLIC_APP_DEBUG,
   REACT_APP_ZKCW_JWT,
   REACT_APP_ZKCW_AUTH,
   REACT_APP_ZKCW_ENDPOINT,
 } = process.env;
-const DEBUG = REACT_APP_DEBUG === "true";
+const DEBUG = NEXT_PUBLIC_APP_DEBUG === "true";
 
 export async function sendMintTransaction(
   params

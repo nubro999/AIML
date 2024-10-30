@@ -27,6 +27,7 @@ export default function Create() {
   const [statusText, setStatusText] = useState<string>('');
   const [statusColor, setStatusColor] = useState<string>('');
   const [o1jsLibraries, setO1jsLibraries] = useState<Promise<any> | null>(null);
+  const [nftAddress, setNftAddress] = useState('');
 
   useEffect(() => {
     // Initialize o1js libraries
@@ -41,68 +42,62 @@ export default function Create() {
     initO1js();
   }, []);
 
+ 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("button")
     
     if (step === 1 && auctionType === 'NFT') {
       setStep(2);
       return;
     }
-
-    setIsLoading(true);
-    
+  
+    if (!backendUrl) {
+      throw new Error('Backend URL is not defined in environment variables');
+    }
+  
     const newAuction: AuctionInput = {
       title,
       currentBid: parseFloat(currentBid),
       endTime,
       auctionType
     };
-
-    try {
-      if (!backendUrl) {
-        throw new Error('Backend URL is not defined in environment variables');
-      }
-
-      const itemData = {
-        name: newAuction.title,
-        description: "Description of the item",
-        minimumPrice: newAuction.currentBid,
-        type: newAuction.auctionType,
-        endTime: newAuction.endTime,
-        auctionType: newAuction.auctionType
-      };
   
-      const response = await fetch(`${backendUrl}/items/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemData),
-      });
+    const itemData = {
+      name: newAuction.title,
+      description: "Description of the item",
+      minimumPrice: newAuction.currentBid,
+      type: newAuction.auctionType,
+      endTime: newAuction.endTime,
+      auctionType: newAuction.auctionType
+    };
   
-      if (response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to create auction: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}`);
-      }
+    const response = await fetch(`${backendUrl}/items/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(itemData),
+    });
   
-      const createdAuction = await response.json();
-      console.log('Auction created:', createdAuction);
-      
-      router.push('/auctions');
-    } catch (error) {
-      console.error('Error creating auction:', error);
-      alert('Auction Created!');
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to create auction: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}`);
     }
+  
+    const createdAuction = await response.json();
+    console.log('Auction created:', createdAuction);
+    return createdAuction;
   };
 
   const handleNFTSend = async () => {
     console.log("handle NFT SEND")
     if (!o1jsLibraries) {
-      console.error('o1js libraries not initialized');
-      return;
+      throw new Error('o1js libraries not initialized');
+    }
+    
+    if (!nftAddress) {
+      throw new Error('Please fill in both NFT address and new owner address');
     }
     
     const showPending = (text: string | JSX.Element | undefined) => {
@@ -113,26 +108,24 @@ export default function Create() {
       setStatusText(text);
       setStatusColor(color);
     };
+  
+    const result = await transferNFT({
+      newOwner: 'B62qkUQoebsMDhaC6vn1PiherKgNeMW4p1hxWKhFw7xkNZwjy4zhDRJ',
+      owner: 'B62qqCax9hAyxiN6ADtox1aJRbkxYaB5v7idfPbCDTFU9BqLYLQBwWh', // Replace with connected wallet address
+      address: nftAddress,
+      showText,
+      showPending,
+      libraries: o1jsLibraries
+    });
     
-    try {
-      const result = await transferNFT({
-        newOwner: 'B62qkUQoebsMDhaC6vn1PiherKgNeMW4p1hxWKhFw7xkNZwjy4zhDRJ', // Replace with actual recipient address
-        owner: 'B62qqCax9hAyxiN6ADtox1aJRbkxYaB5v7idfPbCDTFU9BqLYLQBwWh', // Replace with actual owner address
-        address: 'B62qmvbaCm1qm8hsik7LYiUVmeEfnJEYmL7NZm3MLCaXsD8ZXyUPVQF', // Replace with actual NFT address
-        showText,
-        showPending,
-        libraries: o1jsLibraries
-      });
-      
-      if (result.success) {
-        console.log('Transfer successful, jobId:', result.jobId);
-      } else {
-        console.error('Transfer failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Transfer error:', error);
+    if (!result.success) {
+      throw new Error(result.error || 'NFT transfer failed');
     }
+  
+    return result.jobId;
   };
+
+  
   return (
     <div className={styles.container}>
       <Header/>
@@ -275,16 +268,68 @@ export default function Create() {
                 <li>You have enough funds to cover gas fees</li>
               </ul>
             </div>
+            
+            <div className={styles.nftInputs}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>NFT Address</label>
+                <input
+                  type="text"
+                  value={nftAddress}
+                  onChange={(e) => setNftAddress(e.target.value)}
+                  className={styles.input}
+                  placeholder="Enter NFT contract address"
+                  required
+                />
+              </div>
+              
+            </div>
+
+            {statusText && (
+              <div 
+                className={styles.statusMessage} 
+                style={{ color: statusColor }}
+              >
+                {statusText}
+              </div>
+            )}
+
             <button
               onClick={async (e) => {
-                await handleNFTSend();
-                await handleSubmit(e);
+                try {
+                  setIsLoading(true);
+                  setStatusText('Initiating NFT transfer...');
+                  setStatusColor('blue');
+
+                  // First attempt NFT transfer
+                  await handleNFTSend();
+                  
+                  setStatusText('NFT transfer successful! Creating auction...');
+                  setStatusColor('green');
+
+                  // If NFT transfer succeeds, proceed with auction creation
+                  await handleSubmit(e);
+                  
+                  setStatusText('Auction created successfully!');
+                  setStatusColor('green');
+                  
+                  // Optional: Redirect after success
+                  setTimeout(() => {
+                    router.push('/auctions');
+                  }, 2000);
+
+                } catch (error) {
+                  console.error('Transaction failed:', error);
+                  setStatusText(error instanceof Error ? error.message : 'Transaction failed');
+                  setStatusColor('red');
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className={styles.sendButton}
-              disabled={isLoading}
+              disabled={isLoading || !nftAddress}
             >
               {isLoading ? (
-                'Sending...'
+                'Processing...'
               ) : (
                 <>
                   Send NFT to Auction <Send className={styles.sendIcon} size={20} />

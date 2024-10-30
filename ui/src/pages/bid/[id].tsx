@@ -13,6 +13,7 @@ interface Auction {
   minimumPrice: number;
   title: string;
   endTime: string;
+  zkappAddress: string;
 }
 
 export default function Bid() {
@@ -27,6 +28,7 @@ export default function Bid() {
   const [transactionJSON, setTransactionJSON] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [zkappAddress, setZkappAddress] = useState<string | null>(null);
   const [state, setState] = useState({
     zkappWorkerClient: null as null | ZkappWorkerClient,
     hasWallet: null as null | boolean,
@@ -46,7 +48,6 @@ export default function Bid() {
   }, [id]);
 
   const fetchAuctionDetails = async () => {
-
     try {
       setLoading(true);
       const response = await fetch(`${backendUrl}/items/${id}`);
@@ -55,6 +56,7 @@ export default function Bid() {
       }
       const data = await response.json();
       setAuction(data);
+      setZkappAddress(data.zkappAddress); // Set the zkapp address from the auction data
       setLoading(false);
     } catch (err) {
       setError('Error fetching auction details. Please try again later.');
@@ -173,7 +175,11 @@ export default function Bid() {
   }
   
   const setupZkApp = async () => {
-
+    if (!auction) {
+      setError('Auction data not available');
+      return;
+    }
+    
     await zkappWorkerClient.setActiveInstanceToDevnet();
 
     const mina = (window as any).mina;
@@ -189,7 +195,7 @@ export default function Bid() {
     await zkappWorkerClient.loadContract();
     await zkappWorkerClient.compileContract();
 
-    const zkappPublicKey = PublicKey.fromBase58(ZKAPP_ADDRESS);
+    const zkappPublicKey = PublicKey.fromBase58(auction?.zkappAddress);
     await zkappWorkerClient.initZkappInstance(zkappPublicKey);
     await zkappWorkerClient.fetchAccount({ publicKey: zkappPublicKey });
     const currentNum = await zkappWorkerClient.getMerkleMapRoot();

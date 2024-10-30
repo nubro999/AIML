@@ -1,4 +1,3 @@
-const { NEXT_PUBLIC_APP_CHAIN_ID } = "devnet";
 
 export function explorerAccount() {
   const chain = chainId();
@@ -8,14 +7,15 @@ export function explorerAccount() {
 }
 
 export function explorerTransaction() {
-  const chain = "devnet";
   if (chain === "devnet") return "https://minascan.io/devnet/tx/";
   if (chain === "mainnet") return "https://minascan.io/mainnet/tx/";
   else return "https://zekoscan.io/devnet/tx/";
 }
 
 export function chainId() {
-  if (REACT_APP_CHAIN_ID === undefined)
-    console.error("REACT_APP_CHAIN_ID is undefined");
-  return REACT_APP_CHAIN_ID === "mina:mainnet" ? "mainnet" : "devnet";
+  NEXT_PUBLIC_APP_CHAIN_ID = 'devnet'
+  console.log(NEXT_PUBLIC_APP_CHAIN_ID)
+  if (NEXT_PUBLIC_APP_CHAIN_ID === undefined)
+    console.error("NEXT_PUBLIC_APP_CHAIN_ID is undefined");
+  return NEXT_PUBLIC_APP_CHAIN_ID === "mina:mainnet" ? "mainnet" : "devnet";
 }
