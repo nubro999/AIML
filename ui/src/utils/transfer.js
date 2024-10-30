@@ -1,20 +1,21 @@
-
-import {serializeTransaction} from "./transaction"
-import { sendTransferTransaction } from "./transaction"
-import { chainId } from "./transaction"
-import { getNonce } from "./transaction"
-import logger from "../serverless/logger";
+import { serializeTransaction } from "./transaction";
+import { sendTransferTransaction } from "./send";
+import { getNonce } from "./nonce";
+import { chainId } from "./blockchain/explorer";
 import { NFTContractV2 } from "minanft";
-import { Encoding } from "o1js";
+import logger from "./serverless/logger";
+
 const changeNonce = true; //process.env.REACT_APP_CHAIN_ID === "mina:mainnet";
+
 const log = logger.info.child({
   winstonModule: "TransferButton",
   winstonComponent: "transfer function",
 });
 
-const DEBUG = "true" === process.env.REACT_APP_DEBUG;
+const DEBUG = "true" === process.env.NEXT_PUBLIC_APP_DEBUG;
 
 export async function transferNFT(params) {
+
   console.time("ready to sign");
   if (DEBUG) console.log("Transfer NFT", params);
 

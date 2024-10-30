@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import styles from '../styles/CreateAuction.module.css';
 import Header from '@/components/Header';
 import { Gem, Box, Globe, ArrowRight, Send } from 'lucide-react';
-
+import {transferNFT } from '@/utils/transfer';
 interface AuctionInput {
   title: string;
   currentBid: number;
@@ -23,6 +23,23 @@ export default function Create() {
   const [auctionType, setAuctionType] = useState<'NFT' | 'RWA' | 'Others'>('Others');
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [pending, setPending] = useState<string | JSX.Element | undefined>();
+  const [statusText, setStatusText] = useState<string>('');
+  const [statusColor, setStatusColor] = useState<string>('');
+  const [o1jsLibraries, setO1jsLibraries] = useState<Promise<any> | null>(null);
+
+  useEffect(() => {
+    // Initialize o1js libraries
+    const initO1js = async () => {
+      const libraries = {
+        o1js: await import('o1js'),
+        minanft: await import('minanft')
+      };
+      setO1jsLibraries(Promise.resolve(libraries));
+    };
+    
+    initO1js();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,17 +99,40 @@ export default function Create() {
   };
 
   const handleNFTSend = async () => {
-    setIsLoading(true);
+    console.log("handle NFT SEND")
+    if (!o1jsLibraries) {
+      console.error('o1js libraries not initialized');
+      return;
+    }
+    
+    const showPending = (text: string | JSX.Element | undefined) => {
+      setPending(text);
+    };
+    
+    const showText = async (text: string, color: string) => {
+      setStatusText(text);
+      setStatusColor(color);
+    };
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      window.location.href = '/auctions';
+      const result = await transferNFT({
+        newOwner: 'B62qkUQoebsMDhaC6vn1PiherKgNeMW4p1hxWKhFw7xkNZwjy4zhDRJ', // Replace with actual recipient address
+        owner: 'B62qqCax9hAyxiN6ADtox1aJRbkxYaB5v7idfPbCDTFU9BqLYLQBwWh', // Replace with actual owner address
+        address: 'B62qmvbaCm1qm8hsik7LYiUVmeEfnJEYmL7NZm3MLCaXsD8ZXyUPVQF', // Replace with actual NFT address
+        showText,
+        showPending,
+        libraries: o1jsLibraries
+      });
+      
+      if (result.success) {
+        console.log('Transfer successful, jobId:', result.jobId);
+      } else {
+        console.error('Transfer failed:', result.error);
+      }
     } catch (error) {
-      alert('Failed to send NFT. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Transfer error:', error);
     }
   };
-
   return (
     <div className={styles.container}>
       <Header/>
