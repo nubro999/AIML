@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "compile:contracts": "ts-node src/scripts/compile-contracts.ts",
-    "prebuild": "npm run compile:contracts",
     "build": "nest build",
     "predeploy": "npm run build",
     "deploy": "touch out/.nojekyll && gh-pages -d out --dotfiles",
