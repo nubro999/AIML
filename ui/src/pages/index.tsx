@@ -5,6 +5,7 @@ import styles from '../styles/Home.module.css';
 import ZkappWorkerClient from './zkappWorkerClient';
 import { PublicKey, Field } from 'o1js';
 import Header from '../components/Header';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 export default function Home() {
   const [state, setState] = useState({
@@ -22,10 +23,11 @@ export default function Home() {
   const [transactionLink, setTransactionLink] = useState('');
 
   return (
-    <div className={styles.container}>
+    <div className="relative z-10">
       <Header />
-
-      <main className={styles.main}>
+      <AnimatedBackground />
+      <div className="relative z-10">
+        <main className='styles.css'>
         <section className={styles.hero}>
           <h2>Welcome to AuctionHub</h2>
           <p>Discover unique items and place your bids in our exciting online auctions!</p>
@@ -41,6 +43,10 @@ export default function Home() {
             <p>List your item for auction and start receiving bids.</p>
           </Link>
         </div>
+        </main>
+      </div>
+      <main className={styles.main}>
+        
       </main>
 
       <footer className={styles.footer}>
@@ -49,3 +55,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+
