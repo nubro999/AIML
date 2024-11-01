@@ -14,6 +14,7 @@ export class ItemService {
 
   async DeployMinaContract(): Promise<{ success: boolean; hash?: string; zkappAddress? :PublicKey ;error?: string }> {
     try {
+        console.log("Deploy Mina Contract ")
         const Network = Mina.Network({
             mina: "https://api.minascan.io/node/devnet/v1/graphql",
             archive: 'https://api.minascan.io/archive/devnet/v1/graphql',
@@ -30,7 +31,14 @@ export class ItemService {
         const zkAppAddress = zkAppPrivateKey.toPublicKey();
         console.log("ZkApp keys generated");
 
-        const zkApp = new BiddingContract(zkAppAddress);
+        let zkApp;
+        try {
+           zkApp = new BiddingContract(zkAppAddress);
+          console.log("BiddingContract instance created successfully");
+        } catch (e) {
+            console.error("Error creating BiddingContract:", e);
+            throw e;
+        }
 
         console.time('compile');
         await BiddingProgram.compile();

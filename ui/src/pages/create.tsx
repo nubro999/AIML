@@ -6,7 +6,6 @@ import styles from '../styles/CreateAuction.module.css';
 import Header from '@/components/Header';
 import { Gem, Box, Globe, ArrowRight, Send } from 'lucide-react';
 import {transferNFT } from '@/utils/transfer';
-import { PublicKey } from 'o1js';
 interface AuctionInput {
   title: string;
   currentBid: number;
@@ -114,13 +113,12 @@ export default function Create() {
     const mina = (window as any).mina; 
    
     const publicKeyBase58 = await mina.requestAccounts();
-    const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
-    
+    const owner = publicKeyBase58[0];
   
     const result = await transferNFT({
 
       newOwner: 'B62qkUQoebsMDhaC6vn1PiherKgNeMW4p1hxWKhFw7xkNZwjy4zhDRJ',
-      owner: publicKey,
+      owner: owner,
       address: nftAddress,
       showText,
       showPending,

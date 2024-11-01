@@ -24,7 +24,7 @@ export async function transferNFT(params) {
       return {
         success: false,
         error: "Owner address is undefined",
-      };
+      };  
     }
 
     if (newOwner === undefined || newOwner === "") {
