@@ -17,7 +17,7 @@ import { AuctionWinner } from './auction-winner/auction-winner.entity';
 @Module({
   imports: [TypeOrmModule.forRoot({
     type: 'mysql',
-    host: 'silent-auction.creye0kuc4ct.ap-northeast-2.rds.amazonaws.com',
+    host: 'silent-auction-1.creye0kuc4ct.ap-northeast-2.rds.amazonaws.com',
     port: 3306,
     username: 'root',
     password: 'rootroot',
