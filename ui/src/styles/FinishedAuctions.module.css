@@ -303,12 +303,12 @@
   /* Dark mode support */
   @media (prefers-color-scheme: dark) {
     .container {
-      background: #1a1a1a;
+      background: #fff5f8;
       color: #ffffff;
     }
   
     .auctionBox {
-      background: #2d2d2d;
+      background: #ffff;
       border-color: #ff69b4;
     }
   

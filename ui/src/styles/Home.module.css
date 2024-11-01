@@ -311,7 +311,10 @@
 
 .auctionBox:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(255, 105, 180, 0.2);
+  border-color: #ff69b4;
 }
+
 
 .auctionBox h3 {
   margin-top: 0;
