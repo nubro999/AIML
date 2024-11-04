@@ -10,6 +10,8 @@ import {
 
 let merklemap = new MerkleMap();
 
-merklemap.set(Field(11212602), Field(16202))
-console.log(merklemap)
+merklemap.set(Field(216120), Field(160))
+merklemap.set(Field(2147483647), Field(120))
+
+console.log(merklemap.getRoot())
 
