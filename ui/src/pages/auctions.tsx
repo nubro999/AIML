@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Header from '@/components/Header';
 import { Clock, ArrowUpDown, Filter, Loader2 } from 'lucide-react';
+import module from '../styles/Auctions.module.css';
 
 interface Auction {
   id: number;
@@ -155,15 +156,15 @@ export default function Auctions() {
                         <span className="text-pink-400">Image Placeholder</span>
                       </div>
                     </div>
-                    <div className={auctionStyles.itemActions}>
+                    <div className={module.itemActions}>
                       <button 
-                        className={auctionStyles.registerButton}
+                        className={module.registerButton}
                         onClick={() => handleRegisterClick(auction.id)}
                       >
                         Register to Bid
                       </button>
                       <button 
-                        className={auctionStyles.liveAuctionButton}
+                        className={module.liveAuctionButton}
                         onClick={() => handleLiveAuctionClick(auction.id)}
                       >
                         Live Auction
