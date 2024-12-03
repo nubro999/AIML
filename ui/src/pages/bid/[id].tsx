@@ -43,7 +43,7 @@ export default function Bid() {
   useEffect(() => {
     if (id) {
       fetchAuctionDetails();
-    }
+    } 
   }, [id]);
 
   const fetchAuctionDetails = async () => {

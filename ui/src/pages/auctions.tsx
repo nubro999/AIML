@@ -69,6 +69,7 @@ export default function Auctions() {
     setSortOption(option);
   };
 
+
   const handleRegisterClick = (auctionId: number) => {
     router.push(`/register/${auctionId}`);
   };
@@ -154,49 +155,19 @@ export default function Auctions() {
                         <span className="text-pink-400">Image Placeholder</span>
                       </div>
                     </div>
-                    
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2
-                                   transition-colors duration-200
-                                   hover:text-pink-500">
-                        {auction.name}
-                      </h3>
-                      <p className="text-gray-600 mb-4">{auction.description}</p>
-                      
-                      <div className="flex items-center gap-2 text-gray-500 mb-3
-                                    hover:text-pink-500 transition-colors duration-200">
-                        <ArrowUpDown className="w-4 h-4" />
-                        <span>Minimum Price: {auction.minimumPrice} Mina</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-gray-500 mb-6
-                                    hover:text-pink-500 transition-colors duration-200">
-                        <Clock className="w-4 h-4" />
-                        <span>Ends: {new Date(auction.endTime).toLocaleString()}</span>
-                      </div>
-                      
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleRegisterClick(auction.id)}
-                          className="flex-1 bg-pink-500 text-white py-2 px-4 rounded-lg
-                                   transition-all duration-200 transform
-                                   hover:bg-pink-600 hover:scale-105
-                                   active:scale-95 active:bg-pink-700
-                                   focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-                        >
-                          Register to Bid
-                        </button>
-                        <button
-                          onClick={() => handleLiveAuctionClick(auction.id)}
-                          className="flex-1 border border-pink-500 text-pink-500 py-2 px-4 rounded-lg
-                                   transition-all duration-200 transform
-                                   hover:bg-pink-50 hover:scale-105
-                                   active:scale-95 active:bg-pink-100
-                                   focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-                        >
-                          Live Auction
-                        </button>
-                      </div>
+                    <div className={auctionStyles.itemActions}>
+                      <button 
+                        className={auctionStyles.registerButton}
+                        onClick={() => handleRegisterClick(auction.id)}
+                      >
+                        Register to Bid
+                      </button>
+                      <button 
+                        className={auctionStyles.liveAuctionButton}
+                        onClick={() => handleLiveAuctionClick(auction.id)}
+                      >
+                        Live Auction
+                      </button>
                     </div>
                   </div>
                 ))}
